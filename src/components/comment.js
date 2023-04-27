@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const Comment = (props) => {
+export const Comment = (props) => {
   const [postId] = useState(null)
   return (
     <div>

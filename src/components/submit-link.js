@@ -1,6 +1,6 @@
 import React from "react";
 
-const SubmitLink = () => {
+export const SubmitLink = () => {
   return (
     <div>
       <div>

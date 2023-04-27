@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const SubmitPage = () => {
+export const SubmitPage = () => {
   const [isLink, setIsLink] = useState(false)
   return (
     <div>
