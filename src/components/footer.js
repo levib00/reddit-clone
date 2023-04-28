@@ -1,10 +1,11 @@
 import React from "react";
 
-export const Footer = () => {
-  
+export const Footer = (props) => {
+  const { extend, loadNext } = props
+
   return (
     <div>
-      <div>load more posts</div> or <div>load the next page</div> 
+      <div onClick={extend}>load more posts</div> or <div onClick={loadNext}>load the next page</div> 
     </div>
   )
 }
