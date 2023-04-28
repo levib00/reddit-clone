@@ -1,13 +1,13 @@
 import React from "react";
 
-const Post = () => {
+export const Post = (props) => {
   return (
     <div>
       <img></img>
       <div>
         <div>
           <div>topic</div>
-          <div>title</div>
+          <div>{props.title}</div>
         </div>
         <div>
           <button>expand/collapse button</button>
