@@ -1,11 +1,11 @@
 import React from "react";
 
-const NavBar = () => {
+export const NavBar = (props) => {
 
   return (
     <div>
       <div>
-        <span>auth.name</span>
+        <span>{props.username}</span>
         <span>logout</span>
       </div>
       <div>
