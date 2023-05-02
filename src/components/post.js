@@ -1,19 +1,21 @@
 import React from "react";
 
 export const Post = (props) => {
+// TODO: destructure props.
   return (
     <div>
-      <img></img>
+      <p>{props.post.karma}</p>
+      <img src={props.post.img} alt={`${props.post.title}`}/>
       <div>
         <div>
-          <div>topic</div>
-          <div>{props.title}</div>
+          <div>{props.post.topic}</div>
+          <div>{props.post.title}</div>
         </div>
         <div>
           <button>expand/collapse button</button>
           <div>
             <div>
-              time
+              {props.post.timestamp}
             </div>
             <div>
               no. of comments
