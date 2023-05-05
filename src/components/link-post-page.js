@@ -1,4 +1,6 @@
 import React from "react";
+import { SubmitComment } from "./commentSubmission";
+import { Comment } from "./comment";
 
 export const postPage = () => {
 
@@ -18,6 +20,8 @@ export const postPage = () => {
           <img>scaled up image that can be collapsed by a button</img>
         </div>
       </div>
+      <SubmitComment />
+      <Comment />
     </div>
   )
 }
