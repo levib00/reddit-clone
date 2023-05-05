@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
 export const NavBar = (props) => {
   const {signIn, signOut, getUserName} = props
@@ -8,7 +9,7 @@ export const NavBar = (props) => {
   return (
     <div>
       <div>
-        <span>{username ? username.currentUser.displayName : null}</span>
+        <span>{username.currentUser !== null ? username.currentUser.displayName : null}</span>
         {username ? 
           <span onClick={async() => {
               await signOut
@@ -23,7 +24,7 @@ export const NavBar = (props) => {
           </span>}
       </div>
       <div className="hero">
-        cloneddit
+       <Link to='/'>cloneddit</Link> 
       </div>
     </div>
   )
