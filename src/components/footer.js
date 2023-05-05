@@ -5,7 +5,7 @@ export const Footer = (props) => {
 
   return (
     <div>
-      <div onClick={extend}>load more posts</div> or <div onClick={loadNext}>load the next page</div> 
+      <div><button onClick={extend}>load more posts</button></div> or <div> <button onClick={loadNext}>load the next page</button></div> 
     </div>
   )
 }
