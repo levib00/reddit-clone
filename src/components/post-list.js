@@ -10,6 +10,7 @@ import {
   addDoc,
   updateDoc,
 } from 'firebase/firestore'
+import {v4 as uuidv4} from 'uuid'
 import { Post } from "./post";
 import { Footer } from "./footer";
 
@@ -20,7 +21,6 @@ export const PostList = (props) => {
   const [start, setStart] = useState(0);
   const [numberOfPosts, setNumberOfPosts] = useState(25);
   const [posts, setPosts] = useState(null)
-  const [comments, setComments] = useState(null)
 
   useEffect(() => {
     const getPosts = async() => { 
@@ -28,16 +28,12 @@ export const PostList = (props) => {
       const postCollection = collection(db, 'posts');
       const postSnapshot = await getDocs(postCollection);
       const postArr = [];
-      const commentsArr = [];
+
       postSnapshot.docs.forEach(async doc => {
         const contents = doc.data()
         postArr.push(contents)
-        const commentCollection = collection(db, 'posts', doc.id, 'comments'); // TODO: refactor to isolate getComments 
-        const commentSnapshot = await getDocs(commentCollection); // TODO: might also make it so # of comments is just stored in posts level of db and doc.id is passed to post so that comments can be called when the page loads as opposed to as soon as post list is loaded. 
-        commentSnapshot.docs.forEach(comment => {
-          commentsArr.push(comment.data())
-        })
       })
+      
       return postArr
     }
 
@@ -63,7 +59,7 @@ export const PostList = (props) => {
   
   return (
     <div>
-      {posts ? posts.slice(start, numberOfPosts).map(post => <Post key={post.title} post={post} />) : null}
+      {posts ? posts.slice(start, numberOfPosts).map(post => <Post key={uuidv4()} post={post} />) : null}
       <Footer extend={extend} loadNext={loadNext}/>
     </div>
   )
