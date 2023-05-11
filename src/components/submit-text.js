@@ -11,14 +11,21 @@ export const SubmitText = (props) => {
   const [topicInput, setTopicInput] = useState('')
 
   const submitPosts = async() => {
-      await setDoc(doc(db, 'posts', uuidv4()), {
+    const username = await getUserName().currentUser.displayName
+    if (username !== null) {
+      const postId = uuidv4()
+      await setDoc(doc(db, 'posts', postId), {
         text: textInput,
         karma: 0,
         timeStamp: serverTimestamp(),
         title: titleInput,
         topic: topicInput,
-        userId: await getUserName().currentUser.displayName //getAuth to put username here.
+        userId: username,
+        id: postId
       });
+    } else {
+      return // put some text above the form that says please sign in to submit a post. maybe do signInPopup
+    }
   }
 
   return (
