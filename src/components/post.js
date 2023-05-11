@@ -1,11 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export const Post = (props) => {
-// TODO: destructure props.
+  
+  // TODO: destructure props.
+  const [isImage, setIsImage] = useState(null)
+
+  useEffect(() => {
+    setIsImage(props.post.img ? true : false)
+  }, [props.post.img])
+
   return (
     <div>
       <p>{props.post.karma}</p>
-      <img src={props.post.img} alt={`${props.post.title}`}/>
+      { isImage ? <img src={props.post.img} alt={`${props.post.title}`}/> :  <div>{props.post.text}</div>}
       <div>
         <div>
           <div>{props.post.topic}</div>
@@ -18,7 +26,7 @@ export const Post = (props) => {
               {props.post.timestamp}
             </div>
             <div>
-              no. of comments
+              { isImage ? <Link to={`/link/${props.post.id}`}>no. of comments</Link> : <Link to={`/text/${props.post.id}`}>no. of comments</Link>}
             </div>
           </div>
         </div>
