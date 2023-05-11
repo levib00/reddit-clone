@@ -31,7 +31,7 @@ export const SubmitLink = (props) => {
         timeStamp: serverTimestamp(),
         title: titleInput,
         topic: topicInput,
-        username: username,
+        userId: username,
         id: postId,
       });
     } else {
