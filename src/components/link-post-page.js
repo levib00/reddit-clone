@@ -2,13 +2,36 @@ import React, { useEffect, useState } from "react";
 import { SubmitComment } from "./commentSubmission";
 import { Comment } from "./comment";
 import { useParams } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import {v4 as uuidv4} from 'uuid'
 
 export const LinkPostPage = ({ db }) => {
   const { postId } = useParams()
+
+  const [post, setPost] = useState(null)
   const [comments, setComments] = useState(null)
   const [colPath] = useState([db, 'posts', postId, 'comments'])
+  // TODO: if props is null, useEffect to get information from database.
+
+  useEffect(() => {
+    const getPost = async() => { 
+      // Gets coordinates for character chosen from dropdown.
+      const postCollection = doc(db, 'posts', postId);
+      const postSnapshot = await getDoc(postCollection);
+
+      const contents = postSnapshot.data()
+      return contents
+    }
+    const characterSetter = async() => { //rename
+      try {
+        setPost(await getPost())
+      } catch(error) {
+        console.error(error)
+      }
+    }
+    characterSetter()
+    console.log(post)
+  }, [db])
 
   useEffect(() => {
     const getComments = async() => { 
@@ -23,7 +46,7 @@ export const LinkPostPage = ({ db }) => {
       return commentArr
     }
 
-    const characterSetter = async() => {
+    const characterSetter = async() => { //renmame
       try {
         setComments(await getComments())
       } catch(error) {
@@ -35,20 +58,28 @@ export const LinkPostPage = ({ db }) => {
 
   return (
     <div>
-      <div>
-        <img alt="scaled down image"/>
-      </div>
-      <div>
-        <div>title</div>
+      {
+      post ?
+       <>
         <div>
-          <button>collapse/expand button</button>
-          <div>timestamp</div>
-          <div>user</div>
+          <img src={post.img} alt="scaled down image"/>
         </div>
         <div>
-          <img alt="scaled up image that can be collapsed by a button"/>
+          <div>{post.title}</div>
+          <div>
+            <button>collapse/expand button</button>
+            <div>{post.timestamp}</div>
+            <div>{post.userId}</div>
+          </div>
+          <div>
+            <img alt="scaled up image that can be collapsed by a button"/>
+          </div>
         </div>
-      </div>
+      </>
+      :
+      null
+      }
+      
       <SubmitComment />
       {comments ? comments.map(comment => <Comment key={uuidv4()} comment={ comment } db={db} prev={colPath}/>) : null}
     </div>
