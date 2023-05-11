@@ -30,6 +30,8 @@ import { NavBar } from "./components/nav";
 import { SubmitPage } from "./components/submission-page";
 import { SubmitLink } from "./components/submit-link";
 import { SubmitText } from "./components/submit-text";
+import { LinkPostPage } from "./components/link-post-page";
+import { TextPostPage } from "./components/text-post-page";
 
 function App() {
   const firebaseConfig = {
@@ -95,9 +97,11 @@ function App() {
         <SideBar />
         <Routes>
           <Route path='/' element={<PostList posts={[]} db={db}/>} />
+          <Route path='/link/:postId' element={<LinkPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
+          <Route path='/text/:postId' element={<TextPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
           <Route path='/submit' element={<SubmitPage />}/>
-          <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName}/>}/>
-          <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName}/>}/>
+          <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
+          <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
         </Routes>
       </BrowserRouter>
     </div>
