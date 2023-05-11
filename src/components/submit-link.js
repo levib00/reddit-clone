@@ -4,7 +4,7 @@ import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid'
 
 export const SubmitLink = (props) => {
-  const {db} = props
+  const {db, getUserName} = props
 
   const [selectedFile, setSelectedFile] = useState(undefined);
   const [titleInput, setTitleInput] = useState('')
@@ -19,17 +19,25 @@ export const SubmitLink = (props) => {
       setSelectedFile(e.target.result)
     }
   }
-  
 
   const submitPosts = async() => {
-      await setDoc(doc(db, 'posts', uuidv4()), {
+    const username = await getUserName.currentUser.displayName
+    // TODO: prevent submission if user is not signed in.
+    if (username !== null) {
+      const postId = uuidv4()
+      await setDoc(doc(db, 'posts', postId), {
         img: selectedFile,
         karma: 0,
         timeStamp: serverTimestamp(),
         title: titleInput,
         topic: topicInput,
-        userId: 'userid' //getAuth to put username here.
+        username: username,
+        id: postId,
       });
+    } else {
+      return // put some text above the form that says please sign in to submit a post. maybe do signInPopup
+    }
+      
   }
 
   return (
@@ -46,8 +54,7 @@ export const SubmitLink = (props) => {
          onChange={(e) => {
           handleFiles(e.target.files[0])
           setSelectedFile(e.target.files[0])
-        }}
-        />
+        }}/>
       </div>
       <div>
         <label>title</label>
