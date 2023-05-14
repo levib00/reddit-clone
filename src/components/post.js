@@ -16,7 +16,7 @@ export const Post = (props) => {
       { isImage ? <img src={props.post.img} alt={`${props.post.title}`}/> :  <div>{props.post.text}</div>}
       <div>
         <div>
-          <div>{props.post.topic}</div>
+          <div><Link to={`/topic/${props.post.topic}`}>{props.post.topic}</Link></div>
           <div>{props.post.title}</div>
         </div>
         <div>
@@ -24,6 +24,7 @@ export const Post = (props) => {
           <div>
             <div>
               {props.post.timestamp}
+              {props.post.userId}
             </div>
             <div>
               { isImage ? <Link to={`/link/${props.post.id}`}>no. of comments</Link> : <Link to={`/text/${props.post.id}`}>no. of comments</Link>}
