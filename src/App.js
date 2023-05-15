@@ -24,7 +24,6 @@ import {
   getDownloadURL,
 } from 'firebase/storage';
 import { initializeApp } from "firebase/app";
-import { SideBar } from "./components/sidebar";
 import { PostList } from "./components/post-list"
 import { NavBar } from "./components/nav";
 import { SubmitPage } from "./components/submission-page";
@@ -97,9 +96,8 @@ function App() {
         <Routes>
           <Route path='/' element={<PostList posts={[]} db={db}/>} />
           <Route path="/topic/:topic" element={<PostList posts={[]} db={db} />} />
-          <Route path='/post/link/:postId' element={<LinkPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
-          <Route path='/post/text/:postId' element={<TextPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
-          <Route path='/post/:postId/:commentId' element={<LinkPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
+          <Route path='/post/link/:postId' element={<LinkPostPage db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
+          <Route path='/post/text/:postId' element={<TextPostPage db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
           <Route path='/submit' element={<SubmitPage />}/>
           <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
           <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
