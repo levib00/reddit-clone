@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { SubmitComment } from "./commentSubmission";
+import { SubmitComment } from "./submit-comment";
 import { Comment } from "./comment";
 import { useParams } from "react-router-dom";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import {v4 as uuidv4} from 'uuid'
 import { SideBar } from "./sidebar";
 
-export const LinkPostPage = ({ db }) => {
+export const LinkPostPage = ({ db, getUserName, signInWithPopup }) => {
   const { postId } = useParams()
 
   const [post, setPost] = useState(null)
@@ -78,8 +78,8 @@ export const LinkPostPage = ({ db }) => {
       :
       null
       }
-      <SubmitComment />
-      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} setColPath={setColPath} setTopComments={setComments} level={0} comment={ comment } db={db} prev={colPath}/>) : console.log(comments)}
+      <SubmitComment getUserName={getUserName} signInWithPopup={signInWithPopup} />
+      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} setColPath={setColPath} setTopComments={setComments} level={0} comment={ comment } db={db} prev={colPath}/>) : null}
     </div>
   )
 }
