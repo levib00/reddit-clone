@@ -1,22 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { SubmitComment } from "./commentSubmission";
 import { Comment } from "./comment";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import {v4 as uuidv4} from 'uuid'
 import { SideBar } from "./sidebar";
 
 export const LinkPostPage = ({ db }) => {
   const { postId } = useParams()
-  const location = useLocation()
-  const { prevParams } = location.state
 
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState(null)
-  const [colPath] = useState(prevParams || [db, 'posts', postId, 'comments'])
-  // TODO: if props is null, useEffect to get information from database.
+  const [colPath, setColPath] = useState([db, 'posts', postId, 'comments'])
 
-  useEffect(() => {
+  useEffect(() => { // TODO: see if i can combine this with the other useEffect
     const getPost = async() => { 
       // Gets coordinates for character chosen from dropdown.
       const postRef = doc(db, 'posts', postId);
@@ -33,12 +30,10 @@ export const LinkPostPage = ({ db }) => {
       }
     }
     characterSetter()
-    console.log(post)
   }, [db])
 
   useEffect(() => {
     const getComments = async() => { 
-      // Gets coordinates for character chosen from dropdown.
       const commentCollection = collection.apply(null, colPath)
       const commentSnapshot = await getDocs(commentCollection);
       const commentArr = [];
@@ -49,23 +44,24 @@ export const LinkPostPage = ({ db }) => {
       return commentArr
     }
 
-    const characterSetter = async() => { //renmame
+    const commentSetter = async() => {
       try {
         setComments(await getComments())
       } catch(error) {
         console.error(error)
       }
     }
-    characterSetter()
-  }, [db, postId])
+    commentSetter()
+  }, [db, postId, colPath])
 
   return (
     <div>
       {
       post ?
        <>
+        <SideBar topic={post.topic} />
         <div>
-          <img src={post.img} alt="scaled down image"/>
+          <img src={post.img} />
         </div>
         <div>
           <div>{post.title}</div>
@@ -75,16 +71,15 @@ export const LinkPostPage = ({ db }) => {
             <div>{post.userId}</div>
           </div>
           <div>
-            <img alt="scaled up image that can be collapsed by a button"/>
+            <img />
           </div>
         </div>
       </>
       :
       null
       }
-      
       <SubmitComment />
-      {comments ? comments.map(comment => <Comment key={uuidv4()} level={0} comment={ comment } db={db} prev={colPath}/>) : null}
+      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} setColPath={setColPath} setTopComments={setComments} level={0} comment={ comment } db={db} prev={colPath}/>) : console.log(comments)}
     </div>
   )
 }
