@@ -98,8 +98,8 @@ function App() {
           <Route path='/' element={<PostList posts={[]} db={db}/>} />
           <Route path="/topic/:topic" element={<PostList posts={[]} db={db} />} />
           <Route path='/post/link/:postId' element={<LinkPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
-          <Route path='post/text/:postId' element={<TextPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
-          <Route path='/post/:postId/:commentId' element={<TextPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
+          <Route path='/post/text/:postId' element={<TextPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
+          <Route path='/post/:postId/:commentId' element={<LinkPostPage db={db} signInWithPopup={signInWithPopup}/>}/>
           <Route path='/submit' element={<SubmitPage />}/>
           <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
           <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
