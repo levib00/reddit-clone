@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import { SubmitPage } from "./submission-page";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid'
+import { SignInModal } from "./sign-in-prompt";
 
 export const SubmitLink = (props) => {
-  const {db, getUserName} = props
+  const {db, getUserName, signInWithPopup} = props
 
   const [selectedFile, setSelectedFile] = useState(undefined);
   const [titleInput, setTitleInput] = useState('')
   const [topicInput, setTopicInput] = useState('')
+  const [showSignIn, setShowSignIn] = useState(false)
 
   async function handleFiles(files) {
     const file = files;
@@ -21,8 +23,7 @@ export const SubmitLink = (props) => {
   }
 
   const submitPosts = async() => {
-    const username = await getUserName.currentUser.displayName
-    // TODO: prevent submission if user is not signed in.
+    const username = await getUserName().currentUser.displayName
     if (username !== null) {
       const postId = uuidv4()
       await setDoc(doc(db, 'posts', postId), {
@@ -35,13 +36,14 @@ export const SubmitLink = (props) => {
         id: postId,
       });
     } else {
-      return // put some text above the form that says please sign in to submit a post. maybe do signInPopup
+      setShowSignIn(true)
     }
       
   }
 
   return (
     <div>
+      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a post'}/> : null}
       <SubmitPage />
       <div>
         <label>url</label>

@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import { SubmitPage } from "./submission-page";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid'
+import { SignInModal } from "./sign-in-prompt";
 
 export const SubmitText = (props) => {
-  const {db, getUserName} = props
+  const {db, getUserName, signInWithPopup} = props
 
   const [titleInput, setTitleInput] = useState('')
   const [textInput, setTextInput] = useState('')
   const [topicInput, setTopicInput] = useState('')
+  const [showSignIn, setShowSignIn] = useState(false)
 
   const submitPosts = async() => {
     const username = await getUserName().currentUser.displayName
@@ -24,12 +26,13 @@ export const SubmitText = (props) => {
         id: postId
       });
     } else {
-      return // put some text above the form that says please sign in to submit a post. maybe do signInPopup
+      setShowSignIn(true)
     }
   }
 
   return (
     <div>
+      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a post'}/> : null}
       <SubmitPage />
       <div>
         <label>title</label>
