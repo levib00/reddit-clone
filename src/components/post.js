@@ -27,7 +27,7 @@ export const Post = (props) => {
               {props.post.userId}
             </div>
             <div>
-              { isImage ? <Link to={`/link/${props.post.id}`}>no. of comments</Link> : <Link to={`/text/${props.post.id}`}>no. of comments</Link>}
+              { isImage ? <Link to={`/post/link/${props.post.id}`}>view comments</Link> : <Link to={`/text/${props.post.id}`}>view comments</Link>}
             </div>
           </div>
         </div>
