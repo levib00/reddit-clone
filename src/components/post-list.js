@@ -22,8 +22,7 @@ export const PostList = (props) => {
 
   useEffect(() => {
     const getPosts = async() => { 
-      // Gets coordinates for character chosen from dropdown.
-      // TODO: if topic is selected, use a complex search to find posts only within that topic.
+      // Gets posts for selected topic (defaults to all if no topic is selected).
       let postCollection
       let postSnapshot
       const postArr = [];
@@ -35,13 +34,10 @@ export const PostList = (props) => {
           postArr.push(contents)
         })
       } else {
-        
         const q = query(collection(db, "posts"), where("topic", "==", topic));
 
         postSnapshot = await getDocs(q);
         postSnapshot.forEach((doc) => {
-          // doc.data() is never undefined for query doc snapshots
-          console.log(doc.id, " => ", doc.data());
           postArr.push(doc.data())
         });
       }
