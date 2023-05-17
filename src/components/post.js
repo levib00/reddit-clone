@@ -1,33 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-export const Post = (props) => {
+export const Post = ({post}) => {
+  const {img, karma, title, text, topic, timestamp, userId, id} = post
   
-  // TODO: destructure props.
   const [isImage, setIsImage] = useState(null)
 
   useEffect(() => {
-    setIsImage(props.post.img ? true : false)
-  }, [props.post.img])
+    setIsImage(img ? true : false)
+  }, [img])
 
   return (
     <div>
-      <p>{props.post.karma}</p>
-      { isImage ? <img src={props.post.img} alt={`${props.post.title}`}/> :  <div>{props.post.text}</div>}
+      <p>{karma}</p>
+      { isImage ? <img src={img} alt={`${title}`}/> : <div>{text}</div>}
       <div>
         <div>
-          <div><Link to={`/topic/${props.post.topic}`}>{props.post.topic}</Link></div>
-          <div>{props.post.title}</div>
+          <div><Link to={`/topic/${topic}`}>{topic}</Link></div>
+          <div>{title}</div>
         </div>
         <div>
           <button>expand/collapse button</button>
           <div>
             <div>
-              {props.post.timestamp}
-              {props.post.userId}
+              {timestamp}
+              {userId}
             </div>
             <div>
-              { isImage ? <Link to={`/post/link/${props.post.id}`}>view comments</Link> : <Link to={`/text/${props.post.id}`}>view comments</Link>}
+              { isImage ? <Link to={`/post/link/${id}`}>view comments</Link> : <Link to={`/text/${id}`}>view comments</Link>}
             </div>
           </div>
         </div>
