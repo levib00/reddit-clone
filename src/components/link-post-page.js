@@ -5,6 +5,8 @@ import { useParams } from "react-router-dom";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import {v4 as uuidv4} from 'uuid'
 import { SideBar } from "./sidebar";
+import collapse from '../assets/collapse.png';
+import expandImage from '../assets/expand-img.png';
 
 export const LinkPostPage = ({ db, getUserName, signInWithPopup }) => {
   const { postId } = useParams()
@@ -12,6 +14,7 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup }) => {
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState(null)
   const [colPath, setColPath] = useState([db, 'posts', postId, 'comments'])
+  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => { // TODO: see if i can combine this with the other useEffect
     const getPost = async() => { 
@@ -65,21 +68,21 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup }) => {
         </div>
         <div>
           <div>{post.title}</div>
-          <div>
-            <button>{/* // TODO: put in the function to open/close this, maybe just toggle hide on this and have the small image mbe constant. but it also has to change the image of the button*/}collapse/expand button</button>
+          <div> {/*maybe move backround image of below button into css backgrounds */}
+            <button onClick={() => setExpanded(!expanded)}>{ expanded ? <img src={collapse} alt="The letter X within a circle"/> : <img src={expandImage} alt="A play button"/>}</button>
             <div>{post.timestamp}</div>
             <div>{post.userId}</div>
           </div>
           <div>
-            <img />
+            {expanded ? <img src={post.img}/> : null}
           </div>
         </div>
       </>
       :
       null
       }
-      <SubmitComment getUserName={getUserName} signInWithPopup={signInWithPopup} />
-      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} setColPath={setColPath} setTopComments={setComments} level={0} comment={ comment } db={db} prev={colPath}/>) : null}
+      <SubmitComment getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={[db, 'posts', postId]} postId={postId} db={db} />
+      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} setColPath={setColPath} setTopComments={setComments} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signInWithPopup} comment={comment} db={db} prev={colPath}/>) : null}
     </div>
   )
 }
