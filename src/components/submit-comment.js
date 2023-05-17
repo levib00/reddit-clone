@@ -3,14 +3,13 @@ import React, { useState } from "react";
 import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
 
-export const SubmitComment = ({getUserName, dbPath, signInWithPopup}) => {
+export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowReplyBox, showReplyBox}) => {
   const [commentInput, setCommentInput] = useState('')
   const [showSignIn, setShowSignIn] = useState(false)
 
-  const submitPosts = async() => {
+  const submitComment = async() => {// rename
     const commentId = uuidv4()
     const username = await getUserName().currentUser.displayName
-    // if (isReply) {dbPath.concat([pathToComment])
     if (username !== null) {
       await setDoc(doc.apply(null, dbPath.concat(commentId)), {
         content: commentInput,
@@ -22,13 +21,14 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup}) => {
     } else {
       setShowSignIn(true)
     }
+    setShowReplyBox(!showReplyBox)
   }
 
   return (
     <div>
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
       <textarea onChange={(e) => setCommentInput(e.target.value)} value={commentInput}></textarea>
-      <button onClick={submitPosts}>save</button>
+      <button onClick={submitComment}>save</button>
     </div>
   )
 }
