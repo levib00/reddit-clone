@@ -8,13 +8,25 @@ import { SideBar } from "./sidebar";
 import collapse from '../assets/collapse.png';
 import expandImage from '../assets/expand-img.png';
 
-export const LinkPostPage = ({ db, getUserName, signInWithPopup }) => {
+export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic }) => {
   const { postId } = useParams()
 
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState(null)
   const [colPath, setColPath] = useState([db, 'posts', postId, 'comments'])
   const [expanded, setExpanded] = useState(false)
+
+  useEffect(() => {
+    if (post) {
+      setTopic(post.topic)
+    }
+  }, [post, setTopic])
+
+  useEffect(() => {
+    return () => {
+      setTopic('all')
+    }
+  }, [setTopic])
 
   useEffect(() => { // TODO: see if i can combine this with the other useEffect
     const getPost = async() => { 
@@ -68,7 +80,7 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup }) => {
         </div>
         <div>
           <div>{post.title}</div>
-          <div> {/*maybe move backround image of below button into css backgrounds */}
+          <div> {/*maybe move background image of below button into css backgrounds */}
             <button onClick={() => setExpanded(!expanded)}>{ expanded ? <img src={collapse} alt="The letter X within a circle"/> : <img src={expandImage} alt="A play button"/>}</button>
             <div>{post.timestamp}</div>
             <div>{post.userId}</div>
