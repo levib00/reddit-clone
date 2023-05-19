@@ -13,7 +13,7 @@ import { useParams } from "react-router-dom";
 
 export const PostList = (props) => {
   // TODO: fix to work with tests again, might have to receive posts from app
-  const { db } = props
+  const { db, setTopic } = props
   const { topic } = useParams()
 
   const [start, setStart] = useState(0);
@@ -21,7 +21,22 @@ export const PostList = (props) => {
   const [posts, setPosts] = useState(null)
 
   useEffect(() => {
+    if (topic) {
+      setTopic(topic)
+    } else {
+      setTopic('all')
+    }
+  }, [topic, setTopic])
+
+  useEffect(() => {
+    return () => {
+      setTopic('all')
+    }
+  }, [setTopic])
+
+  useEffect(() => {
     const getPosts = async() => { 
+      // TODO: rework slightly so it only gets the posts that it needs
       // Gets posts for selected topic (defaults to all if no topic is selected).
       let postCollection
       let postSnapshot
