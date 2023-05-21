@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
 export const NavBar = (props) => {
-  const {signIn, signOut, getUserName} = props
+  const {signIn, signOut, getUserName, topic} = props
 
-  const [username, setUserName] = useState(getUserName()) //might want to optimize by only doing this once and assigning it to state at App.js level
+  const [username, setUserName] = useState(getUserName())
 
   return (
     <div>
       <div>
         <span>{username.currentUser !== null ? username.currentUser.displayName : null}</span>
+        {topic ? topic : null }
         {username ? 
           <span onClick={async() => {
               await signOut
