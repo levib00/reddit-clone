@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { 
   getFirestore, 
@@ -9,6 +9,10 @@ import {
   serverTimestamp,
   addDoc,
   updateDoc,
+  query,
+  where,
+  orderBy,
+  limit,
 } from 'firebase/firestore'
 import {
   getAuth,
@@ -17,12 +21,6 @@ import {
   signInWithPopup,
   signOut,
 } from 'firebase/auth';
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from 'firebase/storage';
 import { initializeApp } from "firebase/app";
 import { PostList } from "./components/post-list"
 import { NavBar } from "./components/nav";
@@ -41,7 +39,8 @@ function App() {
     messagingSenderId: "244451787681",
     appId: "1:244451787681:web:5c48c268d82efcbe1681e0",
   };
-  
+
+  const [topic, setTopic] = useState('all')
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
@@ -62,42 +61,45 @@ function App() {
     return getAuth()
   }
 
-  async function saveImageMessage(file) {
+  const [posts, setPosts] = useState(null)
+
+  const getPosts = async(topic) => { 
+    // Gets posts for selected topic (defaults to all if no topic is selected).
+    const postArr = [];
+    if (topic === 'all' || !topic) {
+      const q = query(collection(db, "posts"))
+      const postSnapshot = await getDocs(q);
+      postSnapshot.docs.forEach(async doc => {
+        postArr.push(doc.data())
+      })
+    } else {
+      const q = query(collection(db, "posts"), where("topic", "==", topic));
+      const postSnapshot = await getDocs(q);
+      postSnapshot.forEach((doc) => {
+
+        postArr.push(doc.data())
+      });
+    }
+    return postArr
+  }
+
+  const postSetter = async(topic) => {
     try {
-      // 1 - We add a message with a loading icon that will get updated with the shared image.
-      const messageRef = await addDoc(collection(getFirestore(), 'messages'), {
-        name: getUserName(),
-        imageUrl: null,
-        timestamp: serverTimestamp()
-      });
-  
-      // 2 - Upload the image to Cloud Storage.
-      const filePath = `${getAuth().currentUser.uid}/${messageRef.id}/${file.name}`;
-      const newImageRef = ref(getStorage(), filePath);
-      const fileSnapshot = await uploadBytesResumable(newImageRef, file);
-      
-      // 3 - Generate a public URL for the file.
-      const publicImageUrl = await getDownloadURL(newImageRef);
-  
-      // 4 - Update the chat message placeholder with the image's URL.
-      await updateDoc(messageRef,{
-        imageUrl: publicImageUrl,
-        storageUri: fileSnapshot.metadata.fullPath
-      });
-    } catch (error) {
-      console.error('There was an error uploading a file to Cloud Storage:', error);
+      setPosts(await getPosts(topic))
+    } catch(error) {
+      console.error(error)
     }
   }
 
   return (
     <div className="App">
       <BrowserRouter>
-        <NavBar username={'Username'} signIn={signIn} signOut={signOutUser} getUserName={getUserName}/>
+        <NavBar username={'Username'} topic={topic} signIn={signIn} signOut={signOutUser} getUserName={getUserName}/>
         <Routes>
-          <Route path='/' element={<PostList posts={[]} db={db}/>} />
-          <Route path="/topic/:topic" element={<PostList posts={[]} db={db} />} />
-          <Route path='/post/link/:postId' element={<LinkPostPage db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
-          <Route path='/post/text/:postId' element={<TextPostPage db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
+          <Route path='/' element={<PostList posts={posts} setPosts={setPosts} setTopic={setTopic} postSetter={postSetter} />} />
+          <Route path="/topic/:topic" element={<PostList posts={posts} setTopic={setTopic} postSetter={postSetter}  /> } />
+          <Route path='/post/link/:postId' element={<LinkPostPage setPosts={setPosts} db={db} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
+          <Route path='/post/text/:postId' element={<TextPostPage db={db} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
           <Route path='/submit' element={<SubmitPage />}/>
           <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
           <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
