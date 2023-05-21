@@ -7,7 +7,7 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
   const [commentInput, setCommentInput] = useState('')
   const [showSignIn, setShowSignIn] = useState(false)
 
-  const submitComment = async() => {// rename
+  const submitComment = async() => {
     const commentId = uuidv4()
     const username = await getUserName().currentUser.displayName
     if (username !== null) {
