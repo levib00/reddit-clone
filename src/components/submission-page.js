@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-import { SubmitLink } from "./submit-link";
-import { SubmitText } from "./submit-text";
+import React from "react";
+import { Link } from "react-router-dom";
 
 export const SubmitPage = () => {
   return (
