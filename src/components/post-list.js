@@ -9,10 +9,14 @@ export const PostList = (props) => {
   const { setTopic, postSetter } = props
   const { topic } = useParams()
 
-  const [posts, setPosts] = useState(props.posts)
+  const [posts, setPosts] = useState(null) // TODO: add some sorting recent for sure, then maybe add separate option to sort by top
   const [numberOfPosts, setNumberOfPosts] = useState(25);
 
   const [start, setStart] = useState(0);
+
+  useEffect(() => {
+    setPosts(props.posts)
+  }, [props.posts])
   
   useEffect(() => {
     if (topic) {
