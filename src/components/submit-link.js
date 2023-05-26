@@ -34,11 +34,12 @@ export const SubmitLink = (props) => {
         topic: topicInput,
         userId: username,
         id: postId,
+        upped: [],
+        downed: [],
       });
     } else {
       setShowSignIn(true)
     }
-      
   }
 
   return (
