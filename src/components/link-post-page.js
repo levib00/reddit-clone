@@ -5,16 +5,14 @@ import { useParams } from "react-router-dom";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import {v4 as uuidv4} from 'uuid'
 import { SideBar } from "./sidebar";
-import collapse from '../assets/collapse.png';
-import expandImage from '../assets/expand-img.png';
+import { Post } from "./post";
 
-export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic }) => {
+export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts }) => {
   const { postId } = useParams()
 
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState(null)
   const [colPath, setColPath] = useState([db, 'posts', postId, 'comments'])
-  const [expanded, setExpanded] = useState(false)
 
   useEffect(() => {
     if (post) {
@@ -28,23 +26,21 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic }) => 
     }
   }, [setTopic])
 
-  useEffect(() => { // TODO: see if i can combine this with the other useEffect
+  useEffect(() => { // TODO: see if i can combine this with the other useEffect && see if I can use DI to get rid of any of these getters
     const getPost = async() => { 
-      // Gets coordinates for character chosen from dropdown.
       const postRef = doc(db, 'posts', postId);
       const postSnapshot = await getDoc(postRef);
-
       const contents = postSnapshot.data()
       return contents
     }
-    const characterSetter = async() => { //rename
+    const postSetter = async() => {
       try {
         setPost(await getPost())
       } catch(error) {
         console.error(error)
       }
     }
-    characterSetter()
+    postSetter()
   }, [db])
 
   useEffect(() => {
@@ -75,20 +71,7 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic }) => 
       post ?
        <>
         <SideBar topic={post.topic} />
-        <div>
-          <img src={post.img} />
-        </div>
-        <div>
-          <div>{post.title}</div>
-          <div> {/*maybe move background image of below button into css backgrounds */}
-            <button onClick={() => setExpanded(!expanded)}>{ expanded ? <img src={collapse} alt="The letter X within a circle"/> : <img src={expandImage} alt="A play button"/>}</button>
-            <div>{post.timestamp}</div>
-            <div>{post.userId}</div>
-          </div>
-          <div>
-            {expanded ? <img src={post.img}/> : null}
-          </div>
-        </div>
+        <Post key={uuidv4()} signInWithPopup={signInWithPopup} posts={posts} setPosts={setPost} db={db} username={getUserName()} post={post} from={'post-page'} />
       </>
       :
       null
