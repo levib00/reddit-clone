@@ -6,11 +6,12 @@ import { SideBar } from "./sidebar";
 import { useParams } from "react-router-dom";
 
 export const PostList = (props) => {
-  const { setTopic, postSetter } = props
+  const { setTopic, postSetter, getUserName, db, signInWithPopup } = props
   const { topic } = useParams()
 
   const [posts, setPosts] = useState(null) // TODO: add some sorting recent for sure, then maybe add separate option to sort by top
   const [numberOfPosts, setNumberOfPosts] = useState(25);
+  const [username] = useState(getUserName())
 
   const [start, setStart] = useState(0);
 
@@ -40,7 +41,7 @@ export const PostList = (props) => {
     setNumberOfPosts(numberOfPosts + 25)
     const newPosts = [...posts]
     for ( let i = 0; i < numberOfPosts / 25; i ++) {
-      newPosts.splice(i * 25, 0, <div>Page {i}</div>)
+      newPosts.splice(i * 25, 0, <div key={uuidv4()}>Page {i}</div>)
     }
     setPosts(newPosts)
   }
@@ -53,8 +54,8 @@ export const PostList = (props) => {
   return (
     <div>
       <SideBar topic={topic}/>
-      {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} post={post} />) : null}
-      <Footer extend={extend} loadNext={loadNext}/>
+      {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} posts={posts} setPosts={setPosts} db={db} username={username} signInWithPopup={signInWithPopup} getUserName={getUserName} post={post} from={'post-list'} />) : null}
+      <Footer extend={extend} loadNext={loadNext}/> {/*only load if # of posts is more than 25 */}
     </div>
   )
 }
