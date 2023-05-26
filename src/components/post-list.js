@@ -9,15 +9,32 @@ export const PostList = (props) => {
   const { setTopic, postSetter, getUserName, db, signInWithPopup } = props
   const { topic } = useParams()
 
-  const [posts, setPosts] = useState(null) // TODO: add some sorting recent for sure, then maybe add separate option to sort by top
+  const [posts, setPosts] = useState(null)
   const [numberOfPosts, setNumberOfPosts] = useState(25);
   const [username] = useState(getUserName())
+  const [sortOption, setSortOption] = useState('timeStamp')
 
   const [start, setStart] = useState(0);
 
+  const sortPosts = (posts, sortOption) => {
+    posts.sort((a, b) => {
+      if (b[sortOption] < a[sortOption]) {
+        return -1;
+      }
+      if (b[sortOption] > a[sortOption]) {
+        return 1;
+      }
+      return 0;
+    });
+    return posts
+  }
+
   useEffect(() => {
-    setPosts(props.posts)
-  }, [props.posts])
+    if (props.posts) {
+      const sortedPosts = [...props.posts]
+      setPosts(sortPosts(sortedPosts, sortOption))
+    }
+  }, [props.posts, sortOption])
   
   useEffect(() => {
     if (topic) {
@@ -53,9 +70,13 @@ export const PostList = (props) => {
   
   return (
     <div>
+      <div>
+        <button onClick={() => setSortOption('timeStamp')}>new</button>
+        <button onClick={() => setSortOption('karma')}>top</button>
+      </div>
       <SideBar topic={topic}/>
       {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} posts={posts} setPosts={setPosts} db={db} username={username} signInWithPopup={signInWithPopup} getUserName={getUserName} post={post} from={'post-list'} />) : null}
-      <Footer extend={extend} loadNext={loadNext}/> {/*only load if # of posts is more than 25 */}
+      <Footer extend={extend} loadNext={loadNext}/>
     </div>
   )
 }
