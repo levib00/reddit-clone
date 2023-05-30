@@ -10,7 +10,7 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
   const [childComments, setChildComments] = useState()
   const [prevParams, setPrevParams] = useState([...prev, comment.commentId, 'replies'])
   const [showReplyBox, setShowReplyBox] = useState(false)
-  const [date] = useState(comment.timeStamp ? new Date(comment.timeStamp.seconds*1000).toString() : null) // * can remove ternary in finish, but test posts dont have dates.
+  const [date] = useState(comment.timeStamp.seconds ? new Date(comment.timeStamp.seconds*1000).toString() : new Date(Date.now()).toString())
   const [username] = useState(getUserName())
   const [isUpped, setIsUpped] = useState(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
   const [isDowned, setIsDowned] = useState(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
@@ -32,17 +32,14 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
     setThisComment(clone)
   }
 
-  const updateVote = async(voteArr, vote, otherArr, otherVote) => { // * this needs to be refactored and simplified.
-    const username = getUserName()
+  const updateVote = async(voteArr, vote, otherArr, otherVote, newParams) => { // * this needs to be refactored and simplified.
     if (username.currentUser) {
-      const newParams = prevParams.slice(0, prevParams.length - 1)
       const postUpdate = await doc.apply(null, newParams)
       const index = vote.indexOf(username.currentUser.uid)
       const otherIndex = otherVote.indexOf(username.currentUser.uid)
       const newOtherVote = [...otherVote]
       if (index < 0) {
         const newVote = [...vote, username.currentUser.uid]
-        console.log(newVote)
         await updateDoc(postUpdate, {
           [voteArr]: newVote,
           karma: newVote.length - newOtherVote.length
@@ -70,7 +67,16 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
   }
 
   const handleVote = async(voteArr, vote, otherArr, otherVote) => {
-    updateVote(voteArr, vote, otherArr, otherVote)
+    const newParams = prevParams.slice(0, prevParams.length - 1)
+    updateVote(voteArr, vote, otherArr, otherVote, newParams)
+  }
+
+  const remove = async(postPath) => {
+    const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
+    await updateDoc(postUpdate, {
+      content: '[deleted]',
+      username: '[deleted]'
+    })
   }
 
   const getTopComments = async(prevs) => { 
@@ -110,7 +116,11 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
       </>
       <div>{thisComment.username}</div> <div>{thisComment.karma}</div> <div>{date}</div>
       <div>{thisComment.content}</div>
-      <div onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
+      <div>
+        <div onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
+        <div onClick={() => remove(prevParams)}>delete</div> {/* only show if getUsername.currentUser.uid === comment.userId */}
+        <div onClick={() => console.log('')}>edit</div> {/* // TODO: add these functions.*/}
+      </div>
       {showReplyBox ? <SubmitComment showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={prevParams} /> : null}
       {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()}  getUserName={getUserName} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
       :
