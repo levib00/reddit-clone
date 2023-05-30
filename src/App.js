@@ -28,7 +28,6 @@ import { SubmitPage } from "./components/submission-page";
 import { SubmitLink } from "./components/submit-link";
 import { SubmitText } from "./components/submit-text";
 import { LinkPostPage } from "./components/link-post-page";
-import { TextPostPage } from "./components/text-post-page";
 
 function App() {
   const firebaseConfig = {
@@ -89,7 +88,7 @@ function App() {
       console.error(error)
     }
   }
-  
+
   return (
     <div className="App" style={{overflowAnchor: 'none'}}>
       <BrowserRouter>
