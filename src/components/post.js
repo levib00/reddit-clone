@@ -6,33 +6,41 @@ import expandImage from '../assets/expand-img.png';
 import { doc, updateDoc } from "firebase/firestore";
 import { SignInModal } from "./sign-in-prompt";
 
-export const Post = ({post, username, db, setPosts, posts, getUserName, signInWithPopup, from}) => {
-  const {img, karma, title, text, topic, timeStamp, userId, id, upped, downed} = post
+export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
+  const {img, title, text, topic, timeStamp, userId, id, upped, downed} = post
   
+  const [username] = useState(getUserName())
   const [isImage, setIsImage] = useState(null)
+  const [thisPost, setThisPost] = useState({...post})
   const [expanded, setExpanded] = useState(from === 'post-page' ? true : false)
   const [isUpped, setIsUpped] = useState(upped.includes(username.currentUser.uid))
   const [isDowned, setIsDowned] = useState(downed.includes(username.currentUser.uid))
   const [showSignIn,setShowSignIn] = useState(null)
-
+  
   useEffect(() => {
     setIsImage(img ? true : false)
   }, [img])
 
-  const updatePosts = (newVote, newOtherVote = null, posts, post) => {
-    const postsIndex = posts.indexOf(post)
-    const newPosts = [...posts]
-    newPosts[postsIndex].upped = newVote
+  useEffect(() => {
+    setIsUpped(thisPost.upped ? thisPost.upped.includes(username.currentUser.uid) : false)
+    setIsDowned(thisPost.downed ? thisPost.downed.includes(username.currentUser.uid) : false)
+  }, [thisPost, username.currentUser.uid])
+
+
+  const updatePosts = (newVote, newOtherVote = null, voteArr, otherArr) => {
+    const clone = {...thisPost}
+    clone[voteArr] = newVote
+
     if (newOtherVote !== null) {
-      newPosts[postsIndex].downed = newOtherVote
+      clone[otherArr] = newOtherVote
     }
-    newPosts[postsIndex].karma = newPosts[postsIndex].upped - newPosts[postsIndex].downed
-    setPosts(newPosts)
+    clone.karma = clone.upped.length - clone.downed.length
+    setThisPost(clone)
   }
 
-  const updateVote = async(voteArr, vote, otherArr, otherVote) => {
+  const updateVote = async(voteArr, vote, otherArr, otherVote, newParams) => { // * this needs to be refactored and simplified.
     if (username.currentUser) {
-      const postUpdate = doc(db, 'posts', id)
+      const postUpdate = await doc.apply(null, newParams)
       const index = vote.indexOf(username.currentUser.uid)
       const otherIndex = otherVote.indexOf(username.currentUser.uid)
       const newOtherVote = [...otherVote]
@@ -49,7 +57,7 @@ export const Post = ({post, username, db, setPosts, posts, getUserName, signInWi
             karma: newVote.length - newOtherVote.length
           });
         }
-        updatePosts(newVote, newOtherVote, posts, post, voteArr)
+        updatePosts(newVote, newOtherVote, voteArr, otherArr, thisPost)
       } else {
         const newVote = [...vote]
         newVote.splice(index, 1)
@@ -57,24 +65,24 @@ export const Post = ({post, username, db, setPosts, posts, getUserName, signInWi
           [voteArr]: newVote,
           karma: newVote.length - newOtherVote.length
         })
-        updatePosts(newVote, null, posts, post)
+        updatePosts(newVote, null, voteArr, otherArr, thisPost)
       }
     } else {
-      setShowSignIn(true)
+      //setShowSignIn(true)
     }
   }
 
   const handleVote = async(voteArr, vote, otherArr, otherVote) => {
-    updateVote(voteArr, vote, otherArr, otherVote)
+    updateVote(voteArr, vote, otherArr, otherVote, [db, 'posts', id])
   }
 
   return (
     <div>
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
       <div>
-        <button onClick={() => handleVote('upped', upped,'downed', downed)}>{isUpped ? 'upped' : 'not upped'}</button>
-        <p>{karma}</p>
-        <button onClick={() => handleVote('downed', downed, 'upped', upped)}>{isDowned ? 'downed' : 'not downed'}</button>
+        <button onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}>{isUpped ? 'upped' : 'not upped'}</button>
+        <p>{thisPost.karma}</p>
+        <button onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}>{isDowned ? 'downed' : 'not downed'}</button>
       </div>
       { isImage ? <img src={img} alt={`${title}`}/> : null}
       <div>
