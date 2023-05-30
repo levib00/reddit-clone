@@ -71,12 +71,12 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
       post ?
        <>
         <SideBar topic={post.topic} />
-        <Post key={uuidv4()} signInWithPopup={signInWithPopup} posts={posts} setPosts={setPost} db={db} username={getUserName()} post={post} from={'post-page'} />
+        <Post key={uuidv4()} signInWithPopup={signInWithPopup} posts={posts} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} />
       </>
       :
       null
       }
-      <SubmitComment getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={[db, 'posts', postId]} postId={postId} db={db} />
+      <SubmitComment getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
       {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} setColPath={setColPath} setTopComments={setComments} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signInWithPopup} comment={comment} db={db} prev={colPath}/>) : null}
     </div>
   )
