@@ -19,6 +19,8 @@ export const SubmitText = (props) => {
       await setDoc(doc(db, 'posts', postId), {
         text: textInput,
         karma: 0,
+        upped: [],
+        downed: [],
         timeStamp: serverTimestamp(),
         title: titleInput,
         topic: topicInput,
