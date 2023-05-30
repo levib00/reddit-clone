@@ -76,7 +76,6 @@ function App() {
       const q = query(collection(db, "posts"), where("topic", "==", topic));
       const postSnapshot = await getDocs(q);
       postSnapshot.forEach((doc) => {
-
         postArr.push(doc.data())
       });
     }
@@ -90,16 +89,15 @@ function App() {
       console.error(error)
     }
   }
-
+  
   return (
-    <div className="App">
+    <div className="App" style={{overflowAnchor: 'none'}}>
       <BrowserRouter>
-        <NavBar username={'Username'} topic={topic} signIn={signIn} signOut={signOutUser} getUserName={getUserName}/>
+        <NavBar topic={topic} signIn={signIn} signOut={signOutUser} getUserName={getUserName}/>
         <Routes>
-          <Route path='/' element={<PostList posts={posts} setPosts={setPosts} setTopic={setTopic} postSetter={postSetter} />} />
-          <Route path="/topic/:topic" element={<PostList posts={posts} setTopic={setTopic} postSetter={postSetter}  /> } />
-          <Route path='/post/link/:postId' element={<LinkPostPage setPosts={setPosts} db={db} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
-          <Route path='/post/text/:postId' element={<TextPostPage db={db} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
+          <Route path='/' element={<PostList posts={posts} db={db} signInWithPopup={signInWithPopup} getUserName={getUserName} setPosts={setPosts} setTopic={setTopic} postSetter={postSetter} />} />
+          <Route path="/topic/:topic" element={<PostList posts={posts} db={db} signInWithPopup={signInWithPopup} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter}  /> } />
+          <Route path='/post/link/:postId' element={<LinkPostPage posts={posts} setPosts={setPosts} db={db} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
           <Route path='/submit' element={<SubmitPage />}/>
           <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
           <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
