@@ -1,10 +1,12 @@
-import { doc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import React, { useState } from "react";
 import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
 
-export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowReplyBox, showReplyBox = null, comments, setComments}) => {
-  const [commentInput, setCommentInput] = useState('')
+export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowReplyBox, showReplyBox = null, comments, setComments, prevText = '', setThisComment, thisComment, isEdit = false}) => {
+  const [commentInput, setCommentInput] = useState(prevText)
+  console.log(prevText)
+
   const [showSignIn, setShowSignIn] = useState(false)
 
   const submitComment = async(newComment, username, commentId) => {
@@ -20,25 +22,42 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
     }
   }
 
+  const editComment = async(username, commentPath, prevUserId) => {
+    if (username !== null && username.uid === prevUserId) { 
+      const newComment = commentInput
+      await updateDoc(commentPath, {
+        content: newComment
+      })
+      setThisComment({...thisComment, content: newComment})
+    }
+  }
+
   const clearBox = () => {
     setCommentInput('')
   }
 
   const handleSubmit = async () => {
     const commentId = uuidv4()
-    const username = await getUserName().currentUser.displayName
-    const newComment = {
-      content: commentInput,
-      karma: 0,
-      timeStamp: serverTimestamp(),
-      username: username,
-      commentId: commentId,
-      upped: [],
-      downed: [],
+    const username = await getUserName().currentUser
+    let newComment
+    if (isEdit) {
+      editComment(username, dbPath, thisComment.userId)
+    } else {
+      newComment = {
+        content: commentInput,
+        karma: 0,
+        timeStamp: serverTimestamp(),
+        username: username.displayName,
+        userId: username.uid,
+        commentId: commentId,
+        upped: [],
+        downed: [],
+      }
+      submitComment(newComment, username, commentId);
+      setComments([...comments, newComment])
     }
-    console.log(serverTimestamp())
-    submitComment(newComment, username, commentId);
-    setComments([...comments, newComment])
+    
+    
     clearBox();
   }
 
