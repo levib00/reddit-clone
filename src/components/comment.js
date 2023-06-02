@@ -10,6 +10,7 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
   const [childComments, setChildComments] = useState()
   const [prevParams, setPrevParams] = useState([...prev, comment.commentId, 'replies'])
   const [showReplyBox, setShowReplyBox] = useState(false)
+  const [showEditBox, setShowEditBox] = useState(false)
   const [date] = useState(comment.timeStamp.seconds ? new Date(comment.timeStamp.seconds*1000).toString() : new Date(Date.now()).toString())
   const [username] = useState(getUserName())
   const [isUpped, setIsUpped] = useState(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
@@ -75,8 +76,13 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
     const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
     await updateDoc(postUpdate, {
       content: '[deleted]',
-      username: '[deleted]'
+      username: '[deleted]',
+      isDeleted: true,
     })
+  }
+
+  const edit = async () => {
+    setShowEditBox(!showEditBox)
   }
 
   const getTopComments = async(prevs) => { 
@@ -118,9 +124,17 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
       <div>{thisComment.content}</div>
       <div>
         <div onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
-        <div onClick={() => remove(prevParams)}>delete</div> {/* only show if getUsername.currentUser.uid === comment.userId */}
-        <div onClick={() => console.log('')}>edit</div> {/* // TODO: add these functions.*/}
+        {!thisComment.isDeleted && username.currentUser.uid === comment.userId ? /* only show if getUsername.currentUser.uid === comment.userId */
+        
+        <div>
+          <div onClick={() => remove(prevParams)}>delete</div> {}
+          <div onClick={() => edit()}>edit</div>
+        </div>
+        : 
+        null
+        }
       </div>
+      {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={prevParams} /> : null}
       {showReplyBox ? <SubmitComment showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={prevParams} /> : null}
       {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()}  getUserName={getUserName} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
       :
