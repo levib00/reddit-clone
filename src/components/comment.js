@@ -40,28 +40,29 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
       const index = vote.indexOf(username.currentUser.uid)
       const otherIndex = otherVote.indexOf(username.currentUser.uid)
       const newOtherVote = [...otherVote]
+      let newVote = [...vote]
       if (index < 0) {
-        const newVote = [...vote, username.currentUser.uid]
-        await updateDoc(postUpdate, {
-          [voteArr]: newVote,
-          karma: newVote.length - newOtherVote.length
-        }); // might be able to refactor this out with the else.
+        newVote.push(username.currentUser.uid)
         if (!(otherIndex < 0)) {
           newOtherVote.splice(otherIndex, 1)
-          await updateDoc(postUpdate, {
-            [otherArr]: newOtherVote,
-            karma: newVote.length - newOtherVote.length
-          });
         }
         updatePosts(newVote, newOtherVote, voteArr, otherArr, thisComment)
       } else {
-        const newVote = [...vote]
         newVote.splice(index, 1)
+        updatePosts(newVote, null, voteArr, otherArr, thisComment)
+      }
+      if (voteArr === 'upped') { // * I still think there is a better way to do this
         await updateDoc(postUpdate, {
           [voteArr]: newVote,
+          [otherArr]: newOtherVote,
           karma: newVote.length - newOtherVote.length
-        })
-        updatePosts(newVote, null, voteArr, otherArr, thisComment)
+        });
+      } else {
+        await updateDoc(postUpdate, {
+          [voteArr]: newVote,
+          [otherArr]: newOtherVote,
+          karma: newOtherVote.length - newVote.length
+        });
       }
     } else {
       //setShowSignIn(true)
