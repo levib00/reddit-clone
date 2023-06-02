@@ -15,6 +15,7 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
   const [username] = useState(getUserName())
   const [isUpped, setIsUpped] = useState(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
   const [isDowned, setIsDowned] = useState(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
+  const [showDeletePrompt, setShowDeletePrompt] = useState(false)
 
   useEffect(() => {
     setIsUpped(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
@@ -127,7 +128,7 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
         {!thisComment.isDeleted && username.currentUser.uid === comment.userId ? /* only show if getUsername.currentUser.uid === comment.userId */
         
         <div>
-          <div onClick={() => remove(prevParams)}>delete</div> {}
+          {showDeletePrompt ? <div>are you sure? <div onClick={() => remove(prevParams)}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
           <div onClick={() => edit()}>edit</div>
         </div>
         : 
