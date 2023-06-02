@@ -13,6 +13,9 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState(null)
   const [colPath, setColPath] = useState([db, 'posts', postId, 'comments'])
+  const [sortingOptions, setSortingOptions] = useState([{option : 'timeStamp', displayed: 'recent'},{option: 'karma', displayed: 'top'}])
+  const [sortOption, setSortOption] = useState(sortingOptions[0])
+  const [showDropDown, setShowDropDown] = useState(false)
 
   useEffect(() => {
     if (post) {
@@ -25,6 +28,31 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
       setTopic('all')
     }
   }, [setTopic])
+
+  const sortPosts = (posts, sortOption) => {
+    posts.sort((a, b) => {
+      if (b[sortOption] < a[sortOption]) {
+        return -1;
+      }
+      if (b[sortOption] > a[sortOption]) {
+        return 1;
+      }
+      return 0;
+    });
+    return posts
+  }
+
+  useEffect(() => {
+    if (comments) {
+      const commentsClone = [...comments]
+      setComments(sortPosts(commentsClone, sortOption.option))
+    }
+  }, [sortOption])
+
+  const handleSortSelect = (option) => {
+    setSortOption(option)
+    setShowDropDown(!showDropDown)
+  }
 
   useEffect(() => { // TODO: see if i can combine this with the other useEffect && see if I can use DI to get rid of any of these getters
     const getPost = async() => { 
@@ -57,7 +85,8 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
 
     const commentSetter = async() => {
       try {
-        setComments(await getComments())
+        const commentsClone = [...await getComments()]
+        setComments(sortPosts(commentsClone, sortOption.option))
       } catch(error) {
         console.error(error)
       }
@@ -77,6 +106,17 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
       null
       }
       <SubmitComment getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
+      <div>
+        <div onClick={() => setShowDropDown(!showDropDown)}>
+          {sortOption.displayed}
+          </div>
+          {showDropDown ? 
+           <div>
+            {sortingOptions.map(option => sortOption.option === option.option ? null : <div key={uuidv4()} onClick={() => handleSortSelect(option)}>{option.displayed}</div>)}
+           </div> 
+           : 
+          null}
+        </div>
       {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} setColPath={setColPath} setTopComments={setComments} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signInWithPopup} comment={comment} db={db} prev={colPath}/>) : null}
     </div>
   )
