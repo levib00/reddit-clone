@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import {v4 as uuidv4} from 'uuid'
 import { SubmitComment } from "./submit-comment";
-import { SignInModal } from "./sign-in-prompt";
 
 export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, getUserName, signInWithPopup }) => {
   const { postId } = useParams()
@@ -17,7 +16,6 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
   const [isUpped, setIsUpped] = useState(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
   const [isDowned, setIsDowned] = useState(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
   const [showDeletePrompt, setShowDeletePrompt] = useState(false)
-  const [showSignIn, setShowSignIn] = useState(false)
 
   useEffect(() => {
     setIsUpped(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
@@ -120,7 +118,6 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
 
   return (
     <div>
-      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
       <>
         <button onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}>{isUpped ? 'upped' : 'notUpped'}</button>
         <button onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}>{isDowned ? 'Downed' : 'notDowned'}</button>
@@ -129,7 +126,8 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
       <div>{thisComment.content}</div>
       <div>
         <div onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
-        {!thisComment.isDeleted && username.currentUser.uid === comment.userId ?
+        {!thisComment.isDeleted && username.currentUser.uid === comment.userId ? /* only show if getUsername.currentUser.uid === comment.userId */
+        
         <div>
           {showDeletePrompt ? <div>are you sure? <div onClick={() => remove(prevParams)}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
           <div onClick={() => edit()}>edit</div>
