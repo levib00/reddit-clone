@@ -6,7 +6,7 @@ import { SideBar } from "./sidebar";
 import { useParams } from "react-router-dom";
 
 export const PostList = (props) => {
-  const { setTopic, postSetter, getUserName, db, signInWithPopup } = props
+  const { setTopic, postSetter, getUserName, db, signInWithPopup, uid } = props
   const { topic } = useParams()
 
   const [posts, setPosts] = useState(null)
@@ -36,7 +36,7 @@ export const PostList = (props) => {
     }
   }, [props.posts, sortOption])
   
-  useEffect(() => {
+  useEffect(() => { 
     if (topic) {
       setTopic(topic)
     } else {
@@ -51,8 +51,8 @@ export const PostList = (props) => {
   }, [setTopic])
 
   useEffect(() => {
-    postSetter(topic)
-  }, [topic])
+    postSetter(topic, uid)
+  }, [topic, uid])
 
   const extend = () => {
     setNumberOfPosts(numberOfPosts + 25)
