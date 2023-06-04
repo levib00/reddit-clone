@@ -5,8 +5,6 @@ import { SignInModal } from "./sign-in-prompt";
 
 export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowReplyBox, showReplyBox = null, comments, setComments, prevText = '', setThisComment, thisComment, isEdit = false}) => {
   const [commentInput, setCommentInput] = useState(prevText)
-  console.log(prevText)
-
   const [showSignIn, setShowSignIn] = useState(false)
 
   const submitComment = async(newComment, username, commentId) => {
@@ -52,12 +50,11 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
         commentId: commentId,
         upped: [],
         downed: [],
+        isDeleted: false
       }
       submitComment(newComment, username, commentId);
       setComments([...comments, newComment])
     }
-    
-    
     clearBox();
   }
 
