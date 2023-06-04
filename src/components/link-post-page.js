@@ -13,7 +13,7 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState(null)
   const [colPath, setColPath] = useState([db, 'posts', postId, 'comments'])
-  const [sortingOptions, setSortingOptions] = useState([{option : 'timeStamp', displayed: 'recent'},{option: 'karma', displayed: 'top'}])
+  const [sortingOptions] = useState([{option : 'timeStamp', displayed: 'recent'},{option: 'karma', displayed: 'top'}])
   const [sortOption, setSortOption] = useState(sortingOptions[0])
   const [showDropDown, setShowDropDown] = useState(false)
 
