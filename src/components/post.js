@@ -5,6 +5,7 @@ import collapse from '../assets/collapse.png';
 import expandImage from '../assets/expand-img.png';
 import { DocumentReference, FieldValue, arrayRemove, arrayUnion, doc, getDoc, query, setDoc, updateDoc } from "firebase/firestore";
 import { SignInModal } from "./sign-in-prompt";
+import { async } from "@firebase/util";
 
 export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
   const {img, title, text, topic, timeStamp, userId, id, upped, downed, saved} = post
@@ -17,6 +18,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
   const [isDowned, setIsDowned] = useState(downed.includes(username.currentUser.uid))
   const [isSaved, setIsSaved] = useState(saved.includes(username.currentUser.uid))
   const [showSignIn,setShowSignIn] = useState(null)
+  const [showDeletePrompt, setShowDeletePrompt] = useState(false)
   
   useEffect(() => {
     setIsImage(img ? true : false)
@@ -80,7 +82,6 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
       const postUpdate = await doc.apply(null, newParams)
       const index = vote.indexOf(username.currentUser.uid)
       const newVote = [...vote]
-      console.log(index)
       if (index < 0) {
         newVote.push(username.currentUser.uid)
         updatePosts(newVote, null, voteArr, thisPost)
@@ -92,7 +93,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
         [voteArr]: newVote,
       });
     } else {
-      //setShowSignIn(true)
+      setShowSignIn(true)
     }
   }
 
@@ -124,6 +125,30 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     updateSaves(arrName, arr, [db, 'posts', id])
   }
 
+  const remove = async(postPath) => {
+    const postUpdate = await doc.apply(null, postPath)
+
+    await updateDoc(postUpdate, {
+      title: '[deleted]',
+      userId: '[deleted]',
+      text: '[deleted',
+      isDeleted: true,
+    })
+
+    const clone = {...thisPost}
+    clone.title = '[deleted]'
+    clone.userId = '[deleted]'
+    clone.isDeleted = true
+
+    if (clone.img) {
+      clone.img = '[deleted]'
+    } else {
+      clone.text = '[deleted]'
+    }
+
+    setThisPost(clone)
+  }
+
   return (
     <div>
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
@@ -136,14 +161,14 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
       <div>
         <div>
           <div><Link to={`/topic/${topic}`}>{topic}</Link></div>
-          <div>{title}</div>
+          <div>{thisPost.title}</div>
         </div>
         <div> {/*maybe move background image of below button into css backgrounds*/ }
           {from === 'post-list' ? <button onClick={() => setExpanded(!expanded)}>{expanded ? <img src={collapse}></img> : isImage ? <img src={expandImage}></img> : <img src={expandText}></img>}</button> : null}
           <div>
             <div>
               {timeStamp ? new Date(timeStamp.seconds*1000).toString() : null}
-              {userId}
+              {thisPost.userId}
             </div>
             <div>
               <Link to={`/post/link/${id}`}>view comments</Link>
@@ -155,7 +180,13 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
             <div onClick={() => handleUnsave('saved', thisPost.saved)}>
               unsave
             </div>}
-            { expanded ? isImage ? <img src={img} alt={`${title}`}/> : <div>{text}</div> : null  }
+            {!thisPost.isDeleted && username.currentUser.uid === thisPost.uid ? /* only show if getUsername.currentUser.uid === comment.userId */
+            <div>
+              {showDeletePrompt ? <div>are you sure? <div onClick={() => remove([db, 'posts', id])}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
+            </div>
+            : 
+            null}
+            { expanded ? isImage ? <img src={img} alt={`${title}`}/> : <div>{thisPost.text}</div> : null  }
           </div>
         </div>
       </div>
