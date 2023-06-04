@@ -36,6 +36,9 @@ export const SubmitLink = (props) => {
         id: postId,
         upped: [],
         downed: [],
+        saved: [],
+        isDeleted: false,
+        uid: username.currentUser.uid
       });
     } else {
       setShowSignIn(true)

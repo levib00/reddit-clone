@@ -13,7 +13,7 @@ export const SubmitText = (props) => {
   const [showSignIn, setShowSignIn] = useState(false)
 
   const submitPosts = async() => {
-    const username = await getUserName().currentUser.displayName
+    const username = await getUserName()
     if (username !== null) {
       const postId = uuidv4()
       await setDoc(doc(db, 'posts', postId), {
@@ -24,8 +24,11 @@ export const SubmitText = (props) => {
         timeStamp: serverTimestamp(),
         title: titleInput,
         topic: topicInput,
-        userId: username,
-        id: postId
+        userId: username.currentUser.displayName,
+        id: postId,
+        saved: [],
+        isDeleted: false,
+        uid: username.currentUser.uid
       });
     } else {
       setShowSignIn(true)
