@@ -23,9 +23,14 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
   const editComment = async(username, commentPath, prevUserId) => {
     if (username !== null && username.uid === prevUserId) { 
       const newComment = commentInput
-      await updateDoc(commentPath, {
-        content: newComment
-      })
+      try {
+        await updateDoc(commentPath, {
+          content: newComment
+        })
+      } catch (error) {
+        console.error(error)
+      }
+      
       setThisComment({...thisComment, content: newComment})
     }
   }
@@ -36,7 +41,12 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
 
   const handleSubmit = async () => {
     const commentId = uuidv4()
-    const username = await getUserName().currentUser
+    let username
+    try {
+      username = await getUserName().currentUser
+    } catch (error) {
+      console.error(error)
+    }
     let newComment
     if (isEdit) {
       editComment(username, dbPath, thisComment.userId)

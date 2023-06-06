@@ -7,6 +7,7 @@ import { SignInModal } from "./sign-in-prompt";
 
 export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, getUserName, signInWithPopup }) => {
   const { postId } = useParams()
+
   const [thisComment, setThisComment] = useState({...comment})
   const [childComments, setChildComments] = useState()
   const [prevParams, setPrevParams] = useState([...prev, comment.commentId, 'replies'])
@@ -37,7 +38,13 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
 
   const updateVote = async(voteArr, vote, otherArr, otherVote, newParams) => { // * this needs to be refactored and simplified.
     if (username.currentUser) {
-      const postUpdate = await doc.apply(null, newParams)
+      let postUpdate
+      try {
+        postUpdate = await doc.apply(null, newParams)
+      } catch (error) {
+        console.error(error)
+      }
+      
       const index = vote.indexOf(username.currentUser.uid)
       const otherIndex = otherVote.indexOf(username.currentUser.uid)
       const newOtherVote = [...otherVote]
@@ -53,17 +60,26 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
         updatePosts(newVote, null, voteArr, otherArr, thisComment)
       }
       if (voteArr === 'upped') { // * I still think there is a better way to do this
-        await updateDoc(postUpdate, {
-          [voteArr]: newVote,
-          [otherArr]: newOtherVote,
-          karma: newVote.length - newOtherVote.length
-        });
+        try {
+          await updateDoc(postUpdate, {
+            [voteArr]: newVote,
+            [otherArr]: newOtherVote,
+            karma: newVote.length - newOtherVote.length
+          });
+        } catch(error) {
+          console.error(error)
+        }
+        
       } else {
-        await updateDoc(postUpdate, {
-          [voteArr]: newVote,
-          [otherArr]: newOtherVote,
-          karma: newOtherVote.length - newVote.length
-        });
+        try {
+          await updateDoc(postUpdate, {
+            [voteArr]: newVote,
+            [otherArr]: newOtherVote,
+            karma: newOtherVote.length - newVote.length
+          });
+        } catch(error) {
+          console.error(error)
+        }
       }
     } else {
       setShowSignIn(true)
@@ -75,13 +91,26 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
     updateVote(voteArr, vote, otherArr, otherVote, newParams)
   }
 
+  const handleRemove = (prevParams) => {
+    remove(prevParams)
+    const clone = {...thisComment}
+    clone.content = '[deleted]'
+    clone.username = '[deleted]'
+    clone.isDeleted = true
+    setThisComment(clone)
+  }
+
   const remove = async(postPath) => {
-    const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
-    await updateDoc(postUpdate, {
+    try {
+      const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
+      await updateDoc(postUpdate, {
       content: '[deleted]',
       username: '[deleted]',
       isDeleted: true,
     })
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const edit = async () => {
@@ -122,16 +151,15 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
       <>
         <button onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}>{isUpped ? 'upped' : 'notUpped'}</button>
-        <button onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}>{isDowned ? 'Downed' : 'notDowned'}</button>
+        <button onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}>{isDowned ? 'downed' : 'notDowned'}</button>
       </>
       <div>{thisComment.username}</div> <div>{thisComment.karma}</div> <div>{date}</div>
       <div>{thisComment.content}</div>
       <div>
         <div onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
         {!thisComment.isDeleted && username.currentUser.uid === comment.userId ?
-        
         <div>
-          {showDeletePrompt ? <div>are you sure? <div onClick={() => remove(prevParams)}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
+          {showDeletePrompt ? <div>are you sure? <div onClick={() => handleRemove(prevParams)}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
           <div onClick={() => edit()}>edit</div>
         </div>
         : 
