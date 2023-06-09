@@ -9,11 +9,11 @@ export const NavBar = (props) => {
   return (
     <div>
       <div>
-        <span>{username.currentUser !== null ? username.currentUser.displayName : null}</span>
+        <span>{username ? username.currentUser !== null ? username.currentUser.displayName : null : null}</span>
         {topic ? topic : null }
         {username ? 
           <span onClick={async() => {
-              await signOut
+              await signOut()
               setUserName(null)
             }}>Sign out
           </span>
