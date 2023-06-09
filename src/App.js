@@ -3,16 +3,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { 
   getFirestore, 
   getDocs, 
-  doc, 
-  setDoc, 
-  collection, 
-  serverTimestamp,
-  addDoc,
-  updateDoc,
+  doc,
+  collection,
   query,
   where,
-  orderBy,
-  limit,
+  getDoc,
 } from 'firebase/firestore'
 import {
   getAuth,
@@ -40,6 +35,7 @@ function App() {
   };
 
   const [topic, setTopic] = useState('all')
+  const [uid, setUid] = useState()
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
@@ -60,17 +56,43 @@ function App() {
     return getAuth()
   }
 
+  onAuthStateChanged(getAuth(), (user) => {
+    if (user) {
+      const uid = user.uid;
+      setUid(uid)
+    } else {
+      return null
+    }
+  });
+
   const [posts, setPosts] = useState(null)
 
-  const getPosts = async(topic) => { 
+  const getPosts = async(topic = 'all', uid, searchQuery = null) => { 
     // Gets posts for selected topic (defaults to all if no topic is selected).
     const postArr = [];
-    if (topic === 'all' || !topic) {
+  
+    if (topic === 'all' && !searchQuery ) {
       const q = query(collection(db, "posts"))
       const postSnapshot = await getDocs(q);
       postSnapshot.docs.forEach(async doc => {
         postArr.push(doc.data())
       })
+    } else if (topic === 'saved' && uid) {
+      const q = query(doc(db, "saved", uid))
+      const postSnapshot = await getDoc(q);
+      const savedPosts = postSnapshot.data().savedPosts
+      for (let i = 0; i < savedPosts.length; i++) {
+        let userData = await getDoc(postSnapshot.data().savedPosts[i]);
+        if(userData.exists()) {
+          postArr.push(userData.data()) //rename userData
+        }
+      }
+    } else if (searchQuery) {
+      const q = query(collection(db, "posts"), where('title', '>=', searchQuery), where('title', '<=', searchQuery + '\uf8ff'));
+      const postSnapshot = await getDocs(q);
+      postSnapshot.forEach((doc) => {
+        postArr.push(doc.data())
+      });
     } else {
       const q = query(collection(db, "posts"), where("topic", "==", topic));
       const postSnapshot = await getDocs(q);
@@ -81,9 +103,9 @@ function App() {
     return postArr
   }
 
-  const postSetter = async(topic) => {
+  const postSetter = async(topic, uid, searchQuery = null) => {
     try {
-      setPosts(await getPosts(topic))
+      setPosts(await getPosts(topic, uid, searchQuery))
     } catch(error) {
       console.error(error)
     }
@@ -95,8 +117,8 @@ function App() {
         <NavBar topic={topic} signIn={signIn} signOut={signOutUser} getUserName={getUserName}/>
         <Routes>
           <Route path='/' element={<PostList posts={posts} db={db} signInWithPopup={signInWithPopup} getUserName={getUserName} setPosts={setPosts} setTopic={setTopic} postSetter={postSetter} />} />
-          <Route path="/topic/:topic" element={<PostList posts={posts} db={db} signInWithPopup={signInWithPopup} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter}  /> } />
-          <Route path='/post/link/:postId' element={<LinkPostPage posts={posts} setPosts={setPosts} db={db} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
+          <Route path="/topic/:topic"  element={<PostList uid={uid} posts={posts} db={db} signInWithPopup={signInWithPopup} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />
+          <Route path="/search/:searchQuery"  element={<PostList uid={uid} posts={posts} db={db} signInWithPopup={signInWithPopup} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />          <Route path='/post/link/:postId' element={<LinkPostPage posts={posts} setPosts={setPosts} db={db} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
           <Route path='/submit' element={<SubmitPage />}/>
           <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
           <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName} signInWithPopup={signInWithPopup}/>}/>
