@@ -111,17 +111,17 @@ describe("Test post-list renders properly.", () => {
       </MemoryRouter>
     );
 
-    const deleteButton = screen.getByText('edit');
-    userEvent.click(deleteButton)
+    const editButton = screen.getByText('edit');
+    userEvent.click(editButton)
 
-    const confirmButton = screen.getByRole('textbox');
-    userEvent.click(confirmButton)
-    userEvent.type(confirmButton, ' also this')
+    const textbox = screen.getByRole('textbox');
+    userEvent.click(textbox)
+    userEvent.type(textbox, ' also this')
 
     const saveButton = screen.getByText('save')
     userEvent.click(saveButton)
 
-    const deleted = screen.queryByText('comment content also this');
-    expect(deleted).toBeInTheDocument() 
+    const newComment = screen.queryByText('comment content also this');
+    expect(newComment).toBeInTheDocument() 
   });
 })

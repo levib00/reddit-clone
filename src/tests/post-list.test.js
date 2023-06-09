@@ -11,11 +11,15 @@ jest.mock('react-router', () => ({
   ...jest.requireActual('react-router'),
   useParams: jest.fn(),
 }));
+
 describe("Test post-list renders properly.", () => {
+  const getUserName = () => {
+    return {currentUser: {uid: 'none'}}
+  }
   const generatePosts = (n) => {
     const posts = [];
     for (let i = 0; i < n; i++) {
-      posts.push({title : `This is a post ${i}`})
+      posts.push({title : `This is a post ${i}`, upped: 'none', downed: 'none', saved:'none'})
     }
     return posts
   }
@@ -29,7 +33,7 @@ describe("Test post-list renders properly.", () => {
     
     render(
       <MemoryRouter>
-        <PostList key={uuidv4()} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
+        <PostList key={uuidv4()} getUserName={getUserName} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
       </MemoryRouter>
     );
     for (let i = 0; i < n; i++) {
@@ -49,7 +53,7 @@ describe("Test post-list renders properly.", () => {
     
     render(
       <MemoryRouter>
-        <PostList key={uuidv4()} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
+        <PostList key={uuidv4()} getUserName={getUserName} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
       </MemoryRouter>
     );
     
@@ -70,7 +74,7 @@ describe("Test post-list renders properly.", () => {
     
     render(
       <MemoryRouter>
-        <PostList key={uuidv4()} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
+        <PostList key={uuidv4()} getUserName={getUserName} posts={generatePosts(n)} setTopic={setTopic} postSetter={postSetter}/>
       </MemoryRouter>
     );
 
@@ -96,7 +100,7 @@ describe("Test post-list renders properly.", () => {
     
     render(
       <MemoryRouter>
-        <PostList key={uuidv4()} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
+        <PostList key={uuidv4()} getUserName={getUserName} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
       </MemoryRouter>
     );
     for (let i = 0; i < 25; i++) {
@@ -126,7 +130,7 @@ describe("Test post-list renders properly.", () => {
     
     render(
       <MemoryRouter>
-        <PostList key={uuidv4()} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
+        <PostList key={uuidv4()} getUserName={getUserName} posts={generatePosts(n)}  setTopic={setTopic} postSetter={postSetter}/>
       </MemoryRouter>
     );
 
@@ -135,7 +139,6 @@ describe("Test post-list renders properly.", () => {
       expect(post).toBeInTheDocument();
     }
     const extend = screen.getByText('load more posts')
-    
 
     for (let i = 0; i < 2; i++) {
       userEvent.click(extend)
