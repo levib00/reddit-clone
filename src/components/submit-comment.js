@@ -7,14 +7,10 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
   const [commentInput, setCommentInput] = useState(prevText)
   const [showSignIn, setShowSignIn] = useState(false)
 
-  const submitComment = async(newComment, username, commentId) => {
-    if (username !== null) {
-      await setDoc(doc.apply(null, dbPath.concat([commentId])), {
-        ...newComment
-      });
-    } else {
-      setShowSignIn(true)
-    }
+  const submitComment = async(newComment, commentId) => {
+    await setDoc(doc.apply(null, dbPath.concat([commentId])), {
+      ...newComment
+    });
     if (showReplyBox !== null) {
       setShowReplyBox(!showReplyBox)
     }
@@ -30,7 +26,6 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
       } catch (error) {
         console.error(error)
       }
-      
       setThisComment({...thisComment, content: newComment})
     }
   }
@@ -41,29 +36,27 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
 
   const handleSubmit = async () => {
     const commentId = uuidv4()
-    let username
-    try {
-      username = await getUserName().currentUser
-    } catch (error) {
-      console.error(error)
-    }
-    let newComment
-    if (isEdit) {
-      editComment(username, dbPath, thisComment.userId)
+    let username = getUserName().currentUser
+    if (username !== null) {
+      if (isEdit) {
+        editComment(username, dbPath, thisComment.userId)
+      } else {
+        let newComment = {
+          content: commentInput,
+          karma: 0,
+          timeStamp: serverTimestamp(),
+          username: username.displayName,
+          userId: username.uid,
+          commentId: commentId,
+          upped: [],
+          downed: [],
+          isDeleted: false
+        }
+        submitComment(newComment, commentId);
+        setComments([...comments, newComment])
+      } 
     } else {
-      newComment = {
-        content: commentInput,
-        karma: 0,
-        timeStamp: serverTimestamp(),
-        username: username.displayName,
-        userId: username.uid,
-        commentId: commentId,
-        upped: [],
-        downed: [],
-        isDeleted: false
-      }
-      submitComment(newComment, username, commentId);
-      setComments([...comments, newComment])
+      setShowSignIn(true)
     }
     clearBox();
   }
