@@ -8,6 +8,7 @@ import { useParams } from "react-router-dom";
 export const PostList = (props) => {
   const { setTopic, postSetter, getUserName, db, signInWithPopup, uid } = props
   const { topic } = useParams()
+  const { searchQuery } = useParams()
 
   const [posts, setPosts] = useState(null)
   const [numberOfPosts, setNumberOfPosts] = useState(25);
@@ -51,8 +52,8 @@ export const PostList = (props) => {
   }, [setTopic])
 
   useEffect(() => {
-    postSetter(topic, uid)
-  }, [topic, uid])
+    postSetter(topic, uid, searchQuery)
+  }, [topic, uid, searchQuery])
 
   const extend = () => {
     setNumberOfPosts(numberOfPosts + 25)
