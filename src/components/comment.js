@@ -15,15 +15,17 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
   const [showEditBox, setShowEditBox] = useState(false)
   const [date] = useState(comment.timeStamp.seconds ? new Date(comment.timeStamp.seconds*1000).toString() : new Date(Date.now()).toString())
   const [username] = useState(getUserName())
-  const [isUpped, setIsUpped] = useState(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
-  const [isDowned, setIsDowned] = useState(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
+  const [isUpped, setIsUpped] = useState(username.currentUser && thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
+  const [isDowned, setIsDowned] = useState(username.currentUser && thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
   const [showDeletePrompt, setShowDeletePrompt] = useState(false)
   const [showSignIn, setShowSignIn] = useState(false)
 
   useEffect(() => {
-    setIsUpped(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
-    setIsDowned(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
-  }, [thisComment, username.currentUser.uid])
+    if (username.currentUser) {
+      setIsUpped(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
+      setIsDowned(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
+    }
+  }, [thisComment])
 
   const updatePosts = (newVote, newOtherVote = null, voteArr, otherArr) => {
     const clone = {...thisComment}
@@ -157,7 +159,7 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
       <div>{thisComment.content}</div>
       <div>
         <div onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
-        {!thisComment.isDeleted && username.currentUser.uid === comment.userId ?
+        {!thisComment.isDeleted && username.currentUser && username.currentUser.uid === comment.userId ?
         <div>
           {showDeletePrompt ? <div>are you sure? <div onClick={() => handleRemove(prevParams)}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
           <div onClick={() => edit()}>edit</div>
