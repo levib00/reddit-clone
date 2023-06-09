@@ -3,21 +3,20 @@ import { Link } from "react-router-dom";
 import expandText from '../assets/text-image.png'
 import collapse from '../assets/collapse.png';
 import expandImage from '../assets/expand-img.png';
-import { DocumentReference, FieldValue, arrayRemove, arrayUnion, doc, getDoc, query, setDoc, updateDoc } from "firebase/firestore";
+import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { SignInModal } from "./sign-in-prompt";
-import { async } from "@firebase/util";
 
 export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
-  const {img, title, text, topic, timeStamp, userId, id, upped, downed, saved} = post
+  const {img, title, topic, timeStamp, id, upped, downed, saved} = post
   
   const [username] = useState(getUserName())
   const [isImage, setIsImage] = useState(null)
   const [thisPost, setThisPost] = useState({...post})
   const [expanded, setExpanded] = useState(from === 'post-page' ? true : false)
-  const [isUpped, setIsUpped] = useState(upped.includes(username.currentUser.uid))
-  const [isDowned, setIsDowned] = useState(downed.includes(username.currentUser.uid))
-  const [isSaved, setIsSaved] = useState(saved.includes(username.currentUser.uid))
-  const [showSignIn,setShowSignIn] = useState(null)
+  const [isUpped, setIsUpped] = useState(username.currentUser && upped.includes(username.currentUser.uid))
+  const [isDowned, setIsDowned] = useState(downed.includes(username.currentUser && username.currentUser.uid))
+  const [isSaved, setIsSaved] = useState(saved.includes(username.currentUser && username.currentUser.uid))
+  const [showSignIn, setShowSignIn] = useState(null)
   const [showDeletePrompt, setShowDeletePrompt] = useState(false)
   
   useEffect(() => {
@@ -25,10 +24,12 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
   }, [img])
 
   useEffect(() => {
-    setIsSaved(thisPost.saved ? thisPost.saved.includes(username.currentUser.uid) : false)
-    setIsUpped(thisPost.upped ? thisPost.upped.includes(username.currentUser.uid) : false)
-    setIsDowned(thisPost.downed ? thisPost.downed.includes(username.currentUser.uid) : false)
-  }, [thisPost, username.currentUser.uid])
+    if (username.currentUser) {
+      setIsSaved(thisPost.saved ? thisPost.saved.includes(username.currentUser.uid) : false)
+      setIsUpped(thisPost.upped ? thisPost.upped.includes(username.currentUser.uid) : false)
+      setIsDowned(thisPost.downed ? thisPost.downed.includes(username.currentUser.uid) : false)
+    }
+  }, [thisPost])
 
 
   const updatePosts = (newVote, newOtherVote = null, voteArr, otherArr) => {
@@ -44,7 +45,12 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
 
   const updateVote = async(voteArr, vote, otherArr, otherVote, newParams) => { // * this needs to be refactored and simplified.
     if (username.currentUser) {
-      const postUpdate = await doc.apply(null, newParams)
+      let postUpdate
+      try {
+        postUpdate = await doc.apply(null, newParams)
+      } catch(error) {
+        console.error(error)
+      }
       const index = vote.indexOf(username.currentUser.uid)
       const otherIndex = otherVote.indexOf(username.currentUser.uid)
       const newOtherVote = [...otherVote]
@@ -60,26 +66,39 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
         updatePosts(newVote, null, voteArr, otherArr, thisPost)
       }
       if (voteArr === 'upped') { // * I still think there is a better way to do this
-        await updateDoc(postUpdate, {
+        try{
+          await updateDoc(postUpdate, {
           [voteArr]: newVote,
           [otherArr]: newOtherVote,
           karma: newVote.length - newOtherVote.length
-        });
+          });
+        } catch(error) {
+          console.error(error)
+        }
       } else {
-        await updateDoc(postUpdate, {
-          [voteArr]: newVote,
-          [otherArr]: newOtherVote,
-          karma: newOtherVote.length - newVote.length
-        });
+        try {
+          await updateDoc(postUpdate, {
+            [voteArr]: newVote,
+            [otherArr]: newOtherVote,
+            karma: newOtherVote.length - newVote.length
+          });
+        } catch (error) {
+          console.error(error)
+        }
       }
     } else {
-      //setShowSignIn(true)
+      setShowSignIn(true)
     }
   }
 
   const updateSaves = async(voteArr, vote, newParams) => { // * this needs to be refactored and simplified.
     if (username.currentUser) {
-      const postUpdate = await doc.apply(null, newParams)
+      let postUpdate
+      try {
+        postUpdate = await doc.apply(null, newParams)
+      } catch (error) {
+        console.error(error)
+      }
       const index = vote.indexOf(username.currentUser.uid)
       const newVote = [...vote]
       if (index < 0) {
@@ -89,9 +108,13 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
         newVote.splice(index, 1)
         updatePosts(newVote, null, voteArr, thisPost)
       }
-      await updateDoc(postUpdate, {
-        [voteArr]: newVote,
-      });
+      try {
+        await updateDoc(postUpdate, {
+          [voteArr]: newVote,
+        });
+      } catch(error) {
+        console.error(error)
+      }
     } else {
       setShowSignIn(true)
     }
@@ -102,17 +125,25 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
   }
 
   const savePost = async() => {
-    const q = doc(db, "saved", username.currentUser.uid)
-    await updateDoc(q, {
-      savedPosts: arrayUnion(doc(db, 'posts', thisPost.id))
-    });
+    try {
+      const q = doc(db, "saved", username.currentUser.uid)
+      await updateDoc(q, {
+        savedPosts: arrayUnion(doc(db, 'posts', thisPost.id))
+      });
+    } catch(error) {
+      console.error(error)
+    }
   }
 
   const unsavePost = async() => {
-    const q = doc(db, "saved", username.currentUser.uid)
-    await updateDoc(q, { // change to use uid maybe
-      savedPosts: arrayRemove(doc(db, 'posts', thisPost.id))
-    });
+    try {
+      const q = doc(db, "saved", username.currentUser.uid)
+      await updateDoc(q, { // change to use uid maybe
+        savedPosts: arrayRemove(doc(db, 'posts', thisPost.id))
+      });
+    } catch(error) {
+      console.error(error)
+    }
   }
 
   const handleSave = (arrName, arr) => {
@@ -126,14 +157,17 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
   }
 
   const remove = async(postPath) => {
-    const postUpdate = await doc.apply(null, postPath)
-
-    await updateDoc(postUpdate, {
-      title: '[deleted]',
-      userId: '[deleted]',
-      text: '[deleted',
-      isDeleted: true,
-    })
+    try {
+      let postUpdate= await doc.apply(null, postPath)
+      await updateDoc(postUpdate, {
+        title: '[deleted]',
+        userId: '[deleted]',
+        text: '[deleted]',
+        isDeleted: true,
+      })
+    } catch (error) {
+      console.error()
+    }
 
     const clone = {...thisPost}
     clone.title = '[deleted]'
@@ -145,7 +179,6 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     } else {
       clone.text = '[deleted]'
     }
-
     setThisPost(clone)
   }
 
@@ -153,9 +186,9 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     <div>
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
       <div>
-        <button onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}>{isUpped ? 'upped' : 'not upped'}</button>
+        <button onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}>{isUpped ? 'upped' : 'notUpped'}</button>
         <p>{thisPost.karma}</p>
-        <button onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}>{isDowned ? 'downed' : 'not downed'}</button>
+        <button onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}>{isDowned ? 'downed' : 'notDowned'}</button>
       </div>
       { isImage ? <img src={img} alt={`${title}`}/> : null}
       <div>
@@ -164,11 +197,11 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
           <div>{thisPost.title}</div>
         </div>
         <div> {/*maybe move background image of below button into css backgrounds*/ }
-          {from === 'post-list' ? <button onClick={() => setExpanded(!expanded)}>{expanded ? <img src={collapse}></img> : isImage ? <img src={expandImage}></img> : <img src={expandText}></img>}</button> : null}
+          {from === 'post-list' ? <button className={'expand/collapse'} onClick={() => setExpanded(!expanded)}>{expanded ? <img src={collapse}></img> : isImage ? <img src={expandImage}></img> : <img src={expandText}></img>}</button> : null}
           <div>
             <div>
-              {timeStamp ? new Date(timeStamp.seconds*1000).toString() : null}
-              {thisPost.userId}
+              <div>{timeStamp ? new Date(timeStamp.seconds*1000).toString() : null}</div>
+              <div>{thisPost.userId}</div>
             </div>
             <div>
               <Link to={`/post/link/${id}`}>view comments</Link>
@@ -180,7 +213,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
             <div onClick={() => handleUnsave('saved', thisPost.saved)}>
               unsave
             </div>}
-            {!thisPost.isDeleted && username.currentUser.uid === thisPost.uid ? /* only show if getUsername.currentUser.uid === comment.userId */
+            {!thisPost.isDeleted && username.currentUser && username.currentUser.uid === thisPost.uid ? /* only show if getUsername.currentUser.uid === comment.userId */
             <div>
               {showDeletePrompt ? <div>are you sure? <div onClick={() => remove([db, 'posts', id])}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
             </div>
