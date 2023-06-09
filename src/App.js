@@ -36,6 +36,7 @@ function App() {
 
   const [topic, setTopic] = useState('all')
   const [uid, setUid] = useState()
+  const [isUserSignedIn, setIsUserSignedIn] = useState()
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
@@ -60,8 +61,9 @@ function App() {
     if (user) {
       const uid = user.uid;
       setUid(uid)
+      setIsUserSignedIn(!!user)
     } else {
-      return null
+      setIsUserSignedIn(false)
     }
   });
 
@@ -114,7 +116,7 @@ function App() {
   return (
     <div className="App" style={{overflowAnchor: 'none'}}>
       <BrowserRouter>
-        <NavBar topic={topic} signIn={signIn} signOut={signOutUser} getUserName={getUserName}/>
+        <NavBar topic={topic} signIn={signIn} signOut={signOutUser} getUserName={getUserName} isUserSignedIn={isUserSignedIn}/>
         <Routes>
           <Route path='/' element={<PostList posts={posts} db={db} signInWithPopup={signInWithPopup} getUserName={getUserName} setPosts={setPosts} setTopic={setTopic} postSetter={postSetter} />} />
           <Route path="/topic/:topic"  element={<PostList uid={uid} posts={posts} db={db} signInWithPopup={signInWithPopup} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />
