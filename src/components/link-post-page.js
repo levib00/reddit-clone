@@ -29,7 +29,7 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
     }
   }, [setTopic])
 
-  const sortPosts = (posts, sortOption) => {
+  const sortComments = (posts, sortOption) => {
     posts.sort((a, b) => {
       if (b[sortOption] < a[sortOption]) {
         return -1;
@@ -45,7 +45,7 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
   useEffect(() => {
     if (comments) {
       const commentsClone = [...comments]
-      setComments(sortPosts(commentsClone, sortOption.option))
+      setComments(sortComments(commentsClone, sortOption.option))
     }
   }, [sortOption])
 
@@ -86,7 +86,7 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
     const commentSetter = async() => {
       try {
         const commentsClone = [...await getComments()]
-        setComments(sortPosts(commentsClone, sortOption.option))
+        setComments(sortComments(commentsClone, sortOption.option))
       } catch(error) {
         console.error(error)
       }
