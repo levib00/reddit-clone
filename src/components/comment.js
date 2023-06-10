@@ -5,7 +5,7 @@ import {v4 as uuidv4} from 'uuid'
 import { SubmitComment } from "./submit-comment";
 import { SignInModal } from "./sign-in-prompt";
 
-export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, getUserName, signInWithPopup }) => {
+export const Comment = ({ comment, prev, level, setTopComments, setColPath, getUserName, signIn }) => {
   const { postId } = useParams()
 
   const [thisComment, setThisComment] = useState({...comment})
@@ -25,103 +25,7 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
       setIsUpped(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
       setIsDowned(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
     }
-  }, [thisComment])
-
-  const updatePosts = (newVote, newOtherVote = null, voteArr, otherArr) => {
-    const clone = {...thisComment}
-    clone[voteArr] = newVote
-
-    if (newOtherVote !== null) {
-      clone[otherArr] = newOtherVote
-    }
-    clone.karma = clone.upped.length - clone.downed.length
-    setThisComment(clone)
-  }
-
-  const updateVote = async(voteArr, vote, otherArr, otherVote, newParams) => { // * this needs to be refactored and simplified.
-    if (username.currentUser) {
-      let postUpdate
-      try {
-        postUpdate = await doc.apply(null, newParams)
-      } catch (error) {
-        console.error(error)
-      }
-      
-      const index = vote.indexOf(username.currentUser.uid)
-      const otherIndex = otherVote.indexOf(username.currentUser.uid)
-      const newOtherVote = [...otherVote]
-      let newVote = [...vote]
-      if (index < 0) {
-        newVote.push(username.currentUser.uid)
-        if (!(otherIndex < 0)) {
-          newOtherVote.splice(otherIndex, 1)
-        }
-        updatePosts(newVote, newOtherVote, voteArr, otherArr, thisComment)
-      } else {
-        newVote.splice(index, 1)
-        updatePosts(newVote, null, voteArr, otherArr, thisComment)
-      }
-      if (voteArr === 'upped') { // * I still think there is a better way to do this
-        try {
-          await updateDoc(postUpdate, {
-            [voteArr]: newVote,
-            [otherArr]: newOtherVote,
-            karma: newVote.length - newOtherVote.length
-          });
-        } catch(error) {
-          console.error(error)
-        }
-        
-      } else {
-        try {
-          await updateDoc(postUpdate, {
-            [voteArr]: newVote,
-            [otherArr]: newOtherVote,
-            karma: newOtherVote.length - newVote.length
-          });
-        } catch(error) {
-          console.error(error)
-        }
-      }
-    } else {
-      setShowSignIn(true)
-    }
-  }
-
-  const handleVote = async(voteArr, vote, otherArr, otherVote) => {
-    const newParams = prevParams.slice(0, prevParams.length - 1)
-    updateVote(voteArr, vote, otherArr, otherVote, newParams)
-  }
-
-  const handleRemove = (prevParams) => {
-    remove(prevParams)
-    const clone = {...thisComment}
-    clone.content = '[deleted]'
-    clone.username = '[deleted]'
-    clone.isDeleted = true
-    setThisComment(clone)
-  }
-
-  const remove = async(postPath) => {
-    try {
-      const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
-      await updateDoc(postUpdate, {
-      content: '[deleted]',
-      username: '[deleted]',
-      isDeleted: true,
-    })
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const edit = async () => {
-    setShowEditBox(!showEditBox)
-  }
-
-  const getTopComments = async(prevs) => { 
-    setColPath(prevs)
-  }
+  }, [thisComment, username.currentUser])
 
   useEffect(() => {
     if (!comment.commentId) {
@@ -148,9 +52,113 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
     childCommentSetter()
   }, [postId, setPrevParams, comment.commentId, prev, showReplyBox])
 
+  const updatePosts = (primaryVote, secondaryVote = null, primaryArrName, secondaryArrName) => {
+    const clone = {...thisComment}
+    clone[primaryArrName] = primaryVote
+
+    if (secondaryVote !== null) {
+      clone[secondaryArrName] = secondaryVote
+    }
+    clone.karma = clone.upped.length - clone.downed.length
+    setThisComment(clone)
+  }
+
+  const updateDb = async(primaryArrName, secondaryArrName, primaryVote, secondaryVote, newParams) => {
+    let postUpdate
+    try {
+      postUpdate = await doc.apply(null, newParams)
+    } catch (error) {
+      console.error(error)
+    }
+
+    if (primaryArrName === 'upped') {
+      try {
+        await updateDoc(postUpdate, {
+          [primaryArrName]: primaryVote,
+          [secondaryArrName]: secondaryVote,
+          karma: primaryVote.length - secondaryVote.length
+        });
+      } catch(error) {
+        console.error(error)
+      }
+    } else {
+      try {
+        await updateDoc(postUpdate, {
+          [primaryArrName]: primaryVote,
+          [secondaryArrName]: secondaryVote,
+          karma: secondaryVote.length - primaryVote.length
+        });
+      } catch(error) {
+        console.error(error)
+      }
+    }
+  }
+
+  const updateRender = (primaryVote, primaryArrName, secondaryVote, secondaryArrName, primaryIndex, secondaryIndex) => {
+    if (primaryIndex < 0) {
+      primaryVote.push(username.currentUser.uid)
+      if (!(secondaryIndex < 0)) {
+        secondaryVote.splice(secondaryIndex, 1)
+      }
+      updatePosts(primaryVote, secondaryVote, primaryArrName, secondaryArrName, thisComment)
+    } else {
+      primaryVote.splice(primaryIndex, 1)
+      updatePosts(primaryVote, null, primaryArrName, secondaryArrName, thisComment)
+    }
+  }
+
+  const updateVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, newParams) => {
+    if (username.currentUser) {
+      const primaryIndex = primaryVoteArr.indexOf(username.currentUser.uid)
+      const secondaryIndex = secondaryVoteArr.indexOf(username.currentUser.uid)
+      const secondaryVote = [...secondaryVoteArr]
+      let primaryVote = [...primaryVoteArr]
+
+      updateRender(primaryVote, primaryArrName, secondaryVote, secondaryArrName, primaryIndex, secondaryIndex)
+      updateDb(primaryArrName, secondaryArrName, primaryVote, secondaryVote, newParams)
+    } else {
+      setShowSignIn(true)
+    }
+  }
+
+  const handleVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr) => {
+    const newParams = prevParams.slice(0, prevParams.length - 1)
+    updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, newParams)
+  }
+
+  const remove = async(postPath) => {
+    try {
+      const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
+      await updateDoc(postUpdate, {
+      content: '[deleted]',
+      username: '[deleted]',
+      isDeleted: true,
+    })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleRemove = (prevParams) => {
+    remove(prevParams)
+    const clone = {...thisComment}
+    clone.content = '[deleted]'
+    clone.username = '[deleted]'
+    clone.isDeleted = true
+    setThisComment(clone)
+  }
+
+  const edit = async () => {
+    setShowEditBox(!showEditBox)
+  }
+
+  const getTopComments = async(prevs) => { 
+    setColPath(prevs)
+  }
+
   return (
     <div>
-      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
+      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a comment'} getUserName={getUserName} /> : null}
       <>
         <button onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}>{isUpped ? 'upped' : 'notUpped'}</button>
         <button onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}>{isDowned ? 'downed' : 'notDowned'}</button>
@@ -168,8 +176,8 @@ export const Comment = ({ comment, prev, level, setTopComments, setColPath, db, 
         null
         }
       </div>
-      {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={prevParams} /> : null}
-      {showReplyBox ? <SubmitComment showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={prevParams} /> : null}
+      {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
+      {showReplyBox ? <SubmitComment showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
       {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()}  getUserName={getUserName} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
       :
       <button onClick={() => getTopComments(prevParams)}>Continue this thread</button>}
