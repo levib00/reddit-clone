@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
 
 export const SubmitText = (props) => {
-  const {db, getUserName, signInWithPopup} = props
+  const {db, getUserName, signIn} = props
 
   const [titleInput, setTitleInput] = useState('')
   const [textInput, setTextInput] = useState('')
@@ -37,7 +37,7 @@ export const SubmitText = (props) => {
 
   return (
     <div>
-      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a post'}/> : null}
+      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a post'}/> : null}
       <SubmitPage />
       <div>
         <label>title</label>

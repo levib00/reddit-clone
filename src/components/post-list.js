@@ -6,7 +6,7 @@ import { SideBar } from "./sidebar";
 import { useParams } from "react-router-dom";
 
 export const PostList = (props) => {
-  const { setTopic, postSetter, getUserName, db, signInWithPopup, uid } = props
+  const { setTopic, postSetter, getUserName, db, signIn, uid } = props
   const { topic } = useParams()
   const { searchQuery } = useParams()
 
@@ -76,7 +76,7 @@ export const PostList = (props) => {
         <button onClick={() => setSortOption('karma')}>top</button>
       </div>
       <SideBar topic={topic}/>
-      {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} posts={posts} setPosts={setPosts} db={db} username={username} signInWithPopup={signInWithPopup} getUserName={getUserName} post={post} from={'post-list'} />) : null}
+      {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} posts={posts} setPosts={setPosts} db={db} username={username} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
       <Footer extend={extend} loadNext={loadNext}/>
     </div>
   )

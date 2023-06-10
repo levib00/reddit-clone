@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
 
-export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowReplyBox, showReplyBox = null, comments, setComments, prevText = '', setThisComment, thisComment, isEdit = false}) => {
+export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, showReplyBox = null, comments, setComments, prevText = '', setThisComment, thisComment, isEdit = false}) => {
   const [commentInput, setCommentInput] = useState(prevText)
   const [showSignIn, setShowSignIn] = useState(false)
 
@@ -63,7 +63,7 @@ export const SubmitComment = ({getUserName, dbPath, signInWithPopup, setShowRepl
 
   return (
     <div>
-      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
+      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a comment'} getUserName={getUserName} /> : null}
       <textarea onChange={(e) => setCommentInput(e.target.value)} value={commentInput}></textarea>
       <button onClick={handleSubmit}>save</button>
     </div>

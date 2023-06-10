@@ -7,7 +7,7 @@ import {v4 as uuidv4} from 'uuid'
 import { SideBar } from "./sidebar";
 import { Post } from "./post";
 
-export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts }) => {
+export const LinkPostPage = ({ db, getUserName, signIn, setTopic, posts }) => {
   const { postId } = useParams()
 
   const [post, setPost] = useState(null)
@@ -47,14 +47,14 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
       const commentsClone = [...comments]
       setComments(sortComments(commentsClone, sortOption.option))
     }
-  }, [sortOption])
+  }, [sortOption.option])
 
   const handleSortSelect = (option) => {
     setSortOption(option)
     setShowDropDown(!showDropDown)
   }
 
-  useEffect(() => { // TODO: see if i can combine this with the other useEffect && see if I can use DI to get rid of any of these getters
+  useEffect(() => {
     const getPost = async() => { 
       const postRef = doc(db, 'posts', postId);
       const postSnapshot = await getDoc(postRef);
@@ -71,18 +71,18 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
     postSetter()
   }, [db])
 
-  useEffect(() => {
-    const getComments = async() => { 
-      const commentCollection = collection.apply(null, colPath)
-      const commentSnapshot = await getDocs(commentCollection);
-      const commentArr = [];
-      commentSnapshot.docs.forEach(async doc => {
-        const contents = doc.data()
-        commentArr.push(contents)
-      })
-      return commentArr
-    }
+  const getComments = async() => { 
+    const commentCollection = collection.apply(null, colPath)
+    const commentSnapshot = await getDocs(commentCollection);
+    const commentArr = [];
+    commentSnapshot.docs.forEach(async doc => {
+      const contents = doc.data()
+      commentArr.push(contents)
+    })
+    return commentArr
+  }
 
+  useEffect(() => {
     const commentSetter = async() => {
       try {
         const commentsClone = [...await getComments()]
@@ -100,12 +100,12 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
       post ?
        <>
         <SideBar topic={post.topic} />
-        <Post key={uuidv4()} signInWithPopup={signInWithPopup} posts={posts} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} />
+        <Post key={uuidv4()} signInWithPopup={signIn} posts={posts} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} />
       </>
       :
       null
       }
-      <SubmitComment getUserName={getUserName} signInWithPopup={signInWithPopup} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
+      <SubmitComment getUserName={getUserName} signInWithPopup={signIn} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
       <div>
         <div onClick={() => setShowDropDown(!showDropDown)}>
           {sortOption.displayed}
@@ -117,7 +117,7 @@ export const LinkPostPage = ({ db, getUserName, signInWithPopup, setTopic, posts
            : 
           null}
         </div>
-      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} setColPath={setColPath} setTopComments={setComments} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signInWithPopup} comment={comment} db={db} prev={colPath}/>) : null}
+      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>) : null}
     </div>
   )
 }

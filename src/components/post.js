@@ -29,99 +29,114 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
       setIsUpped(thisPost.upped ? thisPost.upped.includes(username.currentUser.uid) : false)
       setIsDowned(thisPost.downed ? thisPost.downed.includes(username.currentUser.uid) : false)
     }
-  }, [thisPost])
+  }, [thisPost, username.currentUser])
 
-
-  const updatePosts = (newVote, newOtherVote = null, voteArr, otherArr) => {
+  const updatePosts = (updatedArr, secondaryUpdatedArr = null, primaryArrName, secondaryArrName) => {
     const clone = {...thisPost}
-    clone[voteArr] = newVote
+    clone[primaryArrName] = updatedArr
 
-    if (newOtherVote !== null) {
-      clone[otherArr] = newOtherVote
+    if (secondaryUpdatedArr !== null) {
+      clone[secondaryArrName] = secondaryUpdatedArr
     }
+
     clone.karma = clone.upped.length - clone.downed.length // change to happen conditionally
     setThisPost(clone)
   }
 
-  const updateVote = async(voteArr, vote, otherArr, otherVote, newParams) => { // * this needs to be refactored and simplified.
-    if (username.currentUser) {
-      let postUpdate
-      try {
-        postUpdate = await doc.apply(null, newParams)
-      } catch(error) {
-        console.error(error)
-      }
-      const index = vote.indexOf(username.currentUser.uid)
-      const otherIndex = otherVote.indexOf(username.currentUser.uid)
-      const newOtherVote = [...otherVote]
-      const newVote = [...vote]
-      if (index < 0) {
-        newVote.push(username.currentUser.uid)
-        if (!(otherIndex < 0)) {
-          newOtherVote.splice(otherIndex, 1)
-        }
-        updatePosts(newVote, newOtherVote, voteArr, otherArr, thisPost)
-      } else {
-        newVote.splice(index, 1)
-        updatePosts(newVote, null, voteArr, otherArr, thisPost)
-      }
-      if (voteArr === 'upped') { // * I still think there is a better way to do this
-        try{
-          await updateDoc(postUpdate, {
-          [voteArr]: newVote,
-          [otherArr]: newOtherVote,
-          karma: newVote.length - newOtherVote.length
-          });
-        } catch(error) {
-          console.error(error)
-        }
-      } else {
-        try {
-          await updateDoc(postUpdate, {
-            [voteArr]: newVote,
-            [otherArr]: newOtherVote,
-            karma: newOtherVote.length - newVote.length
-          });
-        } catch (error) {
-          console.error(error)
-        }
-      }
-    } else {
-      setShowSignIn(true)
-    }
-  }
+  const updateVoteDb = async(primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, newParams) => {
+    let postUpdate
 
-  const updateSaves = async(voteArr, vote, newParams) => { // * this needs to be refactored and simplified.
-    if (username.currentUser) {
-      let postUpdate
-      try {
-        postUpdate = await doc.apply(null, newParams)
-      } catch (error) {
-        console.error(error)
-      }
-      const index = vote.indexOf(username.currentUser.uid)
-      const newVote = [...vote]
-      if (index < 0) {
-        newVote.push(username.currentUser.uid)
-        updatePosts(newVote, null, voteArr, thisPost)
-      } else {
-        newVote.splice(index, 1)
-        updatePosts(newVote, null, voteArr, thisPost)
-      }
-      try {
+    try {
+      postUpdate = await doc.apply(null, newParams)
+    } catch(error) {
+      console.error(error)
+    }
+
+    if (primaryArrName === 'upped') { // * I still think there is a better way to do this
+      try{
         await updateDoc(postUpdate, {
-          [voteArr]: newVote,
+        [primaryArrName]: primaryVoteArrCopy,
+        [secondaryArrName]: secondaryVoteArrCopy,
+        karma: primaryVoteArrCopy.length - secondaryVoteArrCopy.length
         });
       } catch(error) {
         console.error(error)
       }
     } else {
+      try {
+        await updateDoc(postUpdate, {
+          [primaryArrName]: primaryVoteArrCopy,
+          [secondaryArrName]: secondaryVoteArrCopy,
+          karma: secondaryVoteArrCopy.length - primaryVoteArrCopy.length
+        });
+      } catch (error) {
+        console.error(error)
+      }
+    }
+  }
+
+  const updateVoteRender = (primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, primaryIndex, secondaryIndex) => {
+    if (primaryIndex < 0) {
+      primaryVoteArrCopy.push(username.currentUser.uid)
+      if (!(secondaryIndex < 0)) {
+        secondaryVoteArrCopy.splice(secondaryIndex, 1)
+      }
+      updatePosts(primaryVoteArrCopy, secondaryVoteArrCopy, primaryArrName, secondaryArrName, thisPost)
+    } else {
+      primaryVoteArrCopy.splice(primaryIndex, 1)
+      updatePosts(primaryVoteArrCopy, null, primaryArrName, secondaryArrName, thisPost)
+    }
+  }
+
+  const updateVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, newParams) => { // * this needs to be refactored and simplified.
+    if (username.currentUser) {
+      const primaryIndex = primaryVoteArr.indexOf(username.currentUser.uid)
+      const secondaryIndex = secondaryVoteArr.indexOf(username.currentUser.uid)
+      const primaryVoteArrCopy = [...primaryVoteArr]
+      const secondaryVoteArrCopy = [...secondaryVoteArr]
+      
+      updateVoteRender(primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, primaryIndex, secondaryIndex)
+      updateVoteDb(primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, newParams)
+    } else {
       setShowSignIn(true)
     }
   }
 
-  const handleVote = async(voteArr, vote, otherArr, otherVote) => {
-    updateVote(voteArr, vote, otherArr, otherVote, [db, 'posts', id]) // hardcode path
+  const updateSavesRender = (savedArrName, savedArrCopy, index) => {
+    if (index < 0) {
+      savedArrCopy.push(username.currentUser.uid)
+      updatePosts(savedArrCopy, null, savedArrName, thisPost)
+    } else {
+      savedArrCopy.splice(index, 1)
+      updatePosts(savedArrCopy, null, savedArrName, thisPost)
+    }
+  }
+
+  const updateSavesDb = async(primaryArrName, primaryVoteArrCopy, newParams) => {
+    try {
+      let postUpdate = await doc.apply(null, newParams)
+      await updateDoc(postUpdate, {
+        [primaryArrName]: primaryVoteArrCopy,
+      });
+    } catch(error) {
+      console.error(error)
+    }
+  }
+
+  const updateSaves = async(savedArrName, savedArr, newParams) => { // * this needs to be refactored and simplified.
+    if (username.currentUser) {
+      const index = savedArr.indexOf(username.currentUser.uid)
+      const savedArrCopy = [...savedArr]
+
+      updateSavesRender(savedArrName, savedArrCopy, index)
+      updateSavesDb(savedArrName, savedArrCopy, newParams)
+    } else {
+      setShowSignIn(true)
+    }
+  }
+
+  const handleVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr) => {
+    updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, [db, 'posts', id]) // hardcode path
   }
 
   const savePost = async() => {
@@ -138,7 +153,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
   const unsavePost = async() => {
     try {
       const q = doc(db, "saved", username.currentUser.uid)
-      await updateDoc(q, { // change to use uid maybe
+      await updateDoc(q, {
         savedPosts: arrayRemove(doc(db, 'posts', thisPost.id))
       });
     } catch(error) {
@@ -156,6 +171,21 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     updateSaves(arrName, arr, [db, 'posts', id])
   }
 
+  const handleRemove = (postPath) => {
+    remove(postPath)
+    const clone = {...thisPost}
+    clone.title = '[deleted]'
+    clone.userId = '[deleted]'
+    clone.isDeleted = true
+
+    if (clone.img) {
+      clone.img = '[deleted]'
+    } else {
+      clone.text = '[deleted]'
+    }
+    setThisPost(clone)
+  }
+
   const remove = async(postPath) => {
     try {
       let postUpdate= await doc.apply(null, postPath)
@@ -168,18 +198,6 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     } catch (error) {
       console.error()
     }
-
-    const clone = {...thisPost}
-    clone.title = '[deleted]'
-    clone.userId = '[deleted]'
-    clone.isDeleted = true
-
-    if (clone.img) {
-      clone.img = '[deleted]'
-    } else {
-      clone.text = '[deleted]'
-    }
-    setThisPost(clone)
   }
 
   return (
@@ -204,7 +222,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
               <div>{thisPost.userId}</div>
             </div>
             <div>
-              <Link to={`/post/link/${id}`}>view comments</Link>
+              <Link to={`/post/${id}`}>view comments</Link>
             </div>
             {!isSaved ? <div onClick={() => handleSave('saved', thisPost.saved)}>
               save
@@ -213,9 +231,9 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
             <div onClick={() => handleUnsave('saved', thisPost.saved)}>
               unsave
             </div>}
-            {!thisPost.isDeleted && username.currentUser && username.currentUser.uid === thisPost.uid ? /* only show if getUsername.currentUser.uid === comment.userId */
+            {!thisPost.isDeleted && username.currentUser && username.currentUser.uid === thisPost.uid ?
             <div>
-              {showDeletePrompt ? <div>are you sure? <div onClick={() => remove([db, 'posts', id])}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
+              {showDeletePrompt ? <div>are you sure? <div onClick={() => handleRemove([db, 'posts', id])}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
             </div>
             : 
             null}
