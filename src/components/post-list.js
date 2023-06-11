@@ -7,16 +7,18 @@ import { useParams } from "react-router-dom";
 
 export const PostList = (props) => {
   const { setTopic, postSetter, getUserName, db, signIn, uid } = props
+  // Extract topic or search query from url
   const { topic } = useParams()
   const { searchQuery } = useParams()
 
+  // State variables
   const [posts, setPosts] = useState(null)
   const [numberOfPosts, setNumberOfPosts] = useState(25);
   const [username] = useState(getUserName())
   const [sortOption, setSortOption] = useState('timeStamp')
-
   const [start, setStart] = useState(0);
 
+  // Function to sort posts based on a given sort option
   const sortPosts = (posts, sortOption) => {
     posts.sort((a, b) => {
       if (b[sortOption] < a[sortOption]) {
@@ -37,6 +39,7 @@ export const PostList = (props) => {
     }
   }, [props.posts, sortOption])
   
+  // Set the topic extracted above
   useEffect(() => { 
     if (topic) {
       setTopic(topic)
@@ -45,16 +48,20 @@ export const PostList = (props) => {
     }
   }, [topic, setTopic])
 
+  // Reset the topic when the component is unmounted
   useEffect(() => {
     return () => {
       setTopic('all')
     }
   }, [setTopic])
 
+  // Fetch posts based on the topic, user ID, and search query
   useEffect(() => {
     postSetter(topic, uid, searchQuery)
   }, [topic, uid, searchQuery])
 
+
+  // Function to extend the number of posts displayed
   const extend = () => {
     setNumberOfPosts(numberOfPosts + 25)
     const newPosts = [...posts]
@@ -64,6 +71,7 @@ export const PostList = (props) => {
     setPosts(newPosts)
   }
   
+  // Function to load the next set of posts
   const loadNext = () => {
     setNumberOfPosts(numberOfPosts + 25)
     setStart(start + 25)
@@ -71,11 +79,13 @@ export const PostList = (props) => {
   
   return (
     <div>
+      {/* Sorting options */}
       <div>
         <button onClick={() => setSortOption('timeStamp')}>new</button>
         <button onClick={() => setSortOption('karma')}>top</button>
       </div>
       <SideBar topic={topic}/>
+      {/* Render posts */}
       {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} posts={posts} setPosts={setPosts} db={db} username={username} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
       <Footer extend={extend} loadNext={loadNext}/>
     </div>

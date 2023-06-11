@@ -9,6 +9,7 @@ import { SignInModal } from "./sign-in-prompt";
 export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
   const {img, title, topic, timeStamp, id, upped, downed, saved} = post
   
+  // State variable
   const [username] = useState(getUserName())
   const [isImage, setIsImage] = useState(null)
   const [thisPost, setThisPost] = useState({...post})
@@ -31,6 +32,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }, [thisPost, username.currentUser])
 
+  // Function to update the post state
   const updatePosts = (updatedArr, secondaryUpdatedArr = null, primaryArrName, secondaryArrName) => {
     const clone = {...thisPost}
     clone[primaryArrName] = updatedArr
@@ -43,27 +45,24 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     setThisPost(clone)
   }
 
+  // Function to update votes in the database
   const updateVoteDb = async(primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, newParams) => {
-    let postUpdate
+    
 
-    try {
-      postUpdate = await doc.apply(null, newParams)
-    } catch(error) {
-      console.error(error)
-    }
-
-    if (primaryArrName === 'upped') { // * I still think there is a better way to do this
+    if (primaryArrName === 'upped') {
       try{
+        const postUpdate = await doc.apply(null, newParams)
         await updateDoc(postUpdate, {
-        [primaryArrName]: primaryVoteArrCopy,
-        [secondaryArrName]: secondaryVoteArrCopy,
-        karma: primaryVoteArrCopy.length - secondaryVoteArrCopy.length
+          [primaryArrName]: primaryVoteArrCopy,
+          [secondaryArrName]: secondaryVoteArrCopy,
+          karma: primaryVoteArrCopy.length - secondaryVoteArrCopy.length
         });
       } catch(error) {
         console.error(error)
       }
     } else {
       try {
+        const postUpdate = await doc.apply(null, newParams)
         await updateDoc(postUpdate, {
           [primaryArrName]: primaryVoteArrCopy,
           [secondaryArrName]: secondaryVoteArrCopy,
@@ -75,6 +74,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
+  // Function to update votes in the UI and database
   const updateVoteRender = (primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, primaryIndex, secondaryIndex) => {
     if (primaryIndex < 0) {
       primaryVoteArrCopy.push(username.currentUser.uid)
@@ -88,6 +88,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
+  // Function to handle voting
   const updateVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, newParams) => { // * this needs to be refactored and simplified.
     if (username.currentUser) {
       const primaryIndex = primaryVoteArr.indexOf(username.currentUser.uid)
@@ -102,6 +103,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
+  // Function to update saves in the state to be renders
   const updateSavesRender = (savedArrName, savedArrCopy, index) => {
     if (index < 0) {
       savedArrCopy.push(username.currentUser.uid)
@@ -112,6 +114,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
+  // Function to update saves in the database
   const updateSavesDb = async(primaryArrName, primaryVoteArrCopy, newParams) => {
     try {
       let postUpdate = await doc.apply(null, newParams)
@@ -123,7 +126,8 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
-  const updateSaves = async(savedArrName, savedArr, newParams) => { // * this needs to be refactored and simplified.
+  // Calls functions to update saves in database and state
+  const updateSaves = async(savedArrName, savedArr, newParams) => {
     if (username.currentUser) {
       const index = savedArr.indexOf(username.currentUser.uid)
       const savedArrCopy = [...savedArr]
@@ -135,10 +139,12 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
+  // Handles pressing of a vote button
   const handleVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr) => {
-    updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, [db, 'posts', id]) // hardcode path
+    updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, [db, 'posts', id])
   }
 
+  // Adds post to users saved posts
   const savePost = async() => {
     try {
       const q = doc(db, "saved", username.currentUser.uid)
@@ -150,6 +156,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
+  // Removes post from users saved posts
   const unsavePost = async() => {
     try {
       const q = doc(db, "saved", username.currentUser.uid)
@@ -161,16 +168,19 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
+  // Function to handle saving a post
   const handleSave = (arrName, arr) => {
     savePost()
     updateSaves(arrName, arr, [db, 'posts', id])
   }
 
+  // Function to handle unsaving a post
   const handleUnsave = (arrName, arr) => {
     unsavePost()
     updateSaves(arrName, arr, [db, 'posts', id])
   }
 
+  // Function to handle removing a post from state
   const handleRemove = (postPath) => {
     remove(postPath)
     const clone = {...thisPost}
@@ -186,6 +196,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     setThisPost(clone)
   }
 
+  // Function to remove a post from database
   const remove = async(postPath) => {
     try {
       let postUpdate= await doc.apply(null, postPath)
@@ -202,28 +213,44 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
 
   return (
     <div>
+      {/* Render sign in prompt that shows when users tries an action that requires them to be signed in */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
+      {/* Render upvote/downvote buttons and karma */}
       <div>
-        <button onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}>{isUpped ? 'upped' : 'notUpped'}</button>
+        <button onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}>
+          {isUpped ? 'upped' : 'notUpped'}
+        </button>
         <p>{thisPost.karma}</p>
-        <button onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}>{isDowned ? 'downed' : 'notDowned'}</button>
+        <button onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}>
+          {isDowned ? 'downed' : 'notDowned'}
+        </button>
       </div>
+      {/* Render image if the post has one to render */}
       { isImage ? <img src={img} alt={`${title}`}/> : null}
       <div>
+        {/* Render title and topic */}
         <div>
-          <div><Link to={`/topic/${topic}`}>{topic}</Link></div>
           <div>{thisPost.title}</div>
+          <div><Link to={`/topic/${topic}`}>{topic}</Link></div>
         </div>
-        <div> {/*maybe move background image of below button into css backgrounds*/ }
-          {from === 'post-list' ? <button className={'expand/collapse'} onClick={() => setExpanded(!expanded)}>{expanded ? <img src={collapse}></img> : isImage ? <img src={expandImage}></img> : <img src={expandText}></img>}</button> : null}
+        <div> {/* Maybe move background image of below button into css backgrounds */}
+        {/* Expand/Collapse button to show more or less of the posts content */}
+          {from === 'post-list' ?
+           <button className={'expand/collapse'} onClick={() => setExpanded(!expanded)}>
+            {expanded ? <img src={collapse}></img> : isImage ? <img src={expandImage}></img> : <img src={expandText}></img>}
+           </button> 
+           : null} {/* double check this. */}
           <div>
+            {/* Render post timestamp and username of poster */}
             <div>
               <div>{timeStamp ? new Date(timeStamp.seconds*1000).toString() : null}</div>
               <div>{thisPost.userId}</div>
             </div>
+            {/* Render link to comments */}
             <div>
               <Link to={`/post/${id}`}>view comments</Link>
             </div>
+            {/* Render button to save/unpost post */}
             {!isSaved ? <div onClick={() => handleSave('saved', thisPost.saved)}>
               save
             </div> 
@@ -231,13 +258,15 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
             <div onClick={() => handleUnsave('saved', thisPost.saved)}>
               unsave
             </div>}
+            {/* If post is not deleted and the post belongs to the current user, Render delete and edit buttons */}
             {!thisPost.isDeleted && username.currentUser && username.currentUser.uid === thisPost.uid ?
             <div>
               {showDeletePrompt ? <div>are you sure? <div onClick={() => handleRemove([db, 'posts', id])}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
             </div>
             : 
             null}
-            { expanded ? isImage ? <img src={img} alt={`${title}`}/> : <div>{thisPost.text}</div> : null  }
+            {/* Shows content based on whether content is expanded/collapsed */}
+            {expanded ? isImage ? <img src={img} alt={`${title}`}/> : <div>{thisPost.text}</div> : null }
           </div>
         </div>
       </div>

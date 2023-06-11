@@ -30,8 +30,8 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     }
   }, [thisComment, username.currentUser])
 
+  // Fetch child comments when the postId, commentId, prev, or showReplyBox changes
   useEffect(() => {
-    // Fetch child comments when the postId, commentId, prev, or showReplyBox changes
     if (!comment.commentId) {
       return
     }
@@ -45,9 +45,9 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     childCommentSetter()
   }, [postId, setPrevParams, comment.commentId, prev, showReplyBox])
 
+  // Update the comment object with new upvote/downvote arrays and karma
   const updatePosts = (primaryVoteArrCopy, secondaryVoteArrCopy = null, primaryArrName, secondaryArrName) => {
-    // Update the comment object with new upvote/downvote arrays and karma
-    const clone = {...thisComment}
+    const clone = {...thisComment} // ! reused in post
     clone[primaryArrName] = primaryVoteArrCopy
 
     if (secondaryVoteArrCopy !== null) {
@@ -58,9 +58,9 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     setThisComment(clone)
   }
 
+  // Update the comment in the database with new upvote/downvote arrays and karma
   const updateDb = async(primaryArrName, secondaryArrName, primaryVoteArrCopy, secondaryVoteArrCopy, newParams) => {
-    // Update the comment in the database with new upvote/downvote arrays and karma
-    if (primaryArrName === 'upped') {
+    if (primaryArrName === 'upped') { // ! reused in post
       try {
         const postUpdate = await doc.apply(null, newParams)
         await updateDoc(postUpdate, {
@@ -85,8 +85,8 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     }
   }
 
+  // Update the comment's upvote/downvote arrays and karma for rendering purposes
   const updateRender = (primaryVoteArrCopy, primaryArrName, secondaryVoteArrCopy, secondaryArrName, primaryIndex, secondaryIndex) => {
-    // Update the comment's upvote/downvote arrays and karma for rendering purposes
     if (primaryIndex < 0) {
       primaryVoteArrCopy.push(username.currentUser.uid)
       if (!(secondaryIndex < 0)) {
@@ -99,6 +99,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     }
   }
 
+  // Passes calls functions to update state and Database with new upvotes and downvotes
   const updateVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, newParams) => {
     if (username.currentUser) {
       const primaryIndex = primaryVoteArr.indexOf(username.currentUser.uid)
@@ -118,8 +119,8 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, newParams)
   }
 
+  // Remove the comment from the database
   const remove = async(postPath) => {
-    // Remove the comment from the database
     try {
       const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
       await updateDoc(postUpdate, {
@@ -132,8 +133,8 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     }
   }
 
+  // Handle the deletion of the comment
   const handleRemove = (prevParams) => {
-    // Handle the deletion of the comment
     remove(prevParams)
     const clone = {...thisComment}
     clone.content = '[deleted]'
@@ -142,13 +143,13 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     setThisComment(clone)
   }
 
+  // Toggle the edit comment form
   const edit = async () => {
-    // Toggle the edit comment form
     setShowEditBox(!showEditBox)
   }
 
+  // Fetch the top-level comments for the thread continuation
   const getTopComments = async(prevs) => { 
-    // Fetch the top-level comments for the thread continuation
     setColPath(prevs)
   }
 

@@ -7,15 +7,18 @@ import { SignInModal } from "./sign-in-prompt";
 export const SubmitText = (props) => {
   const {db, getUserName, signIn} = props
 
+// State variables
   const [titleInput, setTitleInput] = useState('')
   const [textInput, setTextInput] = useState('')
   const [topicInput, setTopicInput] = useState('')
   const [showSignIn, setShowSignIn] = useState(false)
 
+  // Function to submit the posts to the database
   const submitPosts = async() => {
     const username = await getUserName()
     if (username !== null) {
       const postId = uuidv4()
+      // Store the post data in the "posts" collection
       await setDoc(doc(db, 'posts', postId), {
         text: textInput,
         karma: 0,
@@ -31,6 +34,7 @@ export const SubmitText = (props) => {
         uid: username.currentUser.uid
       });
     } else {
+      // Show the sign-in modal if the user is not signed in
       setShowSignIn(true)
     }
   }

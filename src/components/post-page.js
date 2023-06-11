@@ -24,7 +24,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts }) => {
     }
   }, [post, setTopic])
 
-  // Set topic to all when leaving post page
+  // Set topic to all when unmounting
   useEffect(() => {
     return () => {
       setTopic('all')

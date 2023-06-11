@@ -7,11 +7,13 @@ import { SignInModal } from "./sign-in-prompt";
 export const SubmitLink = (props) => {
   const {db, getUserName, signIn} = props
 
+  // State variables
   const [selectedFile, setSelectedFile] = useState(undefined);
   const [titleInput, setTitleInput] = useState('')
   const [topicInput, setTopicInput] = useState('')
   const [showSignIn, setShowSignIn] = useState(false)
 
+  // Function to put files in a format firestore can hold
   async function handleFiles(files) {
     const file = files;
     
@@ -22,6 +24,7 @@ export const SubmitLink = (props) => {
     }
   }
 
+  // Function to submit the link post
   const submitPosts = async() => {
     const username = await getUserName().currentUser.displayName
     if (username !== null) {
@@ -47,8 +50,10 @@ export const SubmitLink = (props) => {
 
   return (
     <div>
+      {/* Render the sign-in modal if user tries to do an action that requires them to be signed in */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a post'}/> : null}
       <SubmitPage />
+      {/* form for user to fill in content */}
       <div>
         <label>url</label>
         <input type="text"></input>
@@ -70,9 +75,11 @@ export const SubmitLink = (props) => {
         <label>topic</label>
         <input type="text" onChange={(e) => {setTopicInput(e.target.value)}} value={topicInput}></input>
       </div>
-      <div>
-        anything is saved and is subject to be removed at any time for any reason.
-      </div>
+      <p>
+        Please try to keep posts appropriate. If you wouldn't share it with your workplace, don't share it here.
+        Anything you post is subject to be deleted at any time.
+      </p>
+      {/* Button to submit post */}
       <button onClick={() => {
         submitPosts()
       }}>Submit</button>
