@@ -5,7 +5,7 @@ import {v4 as uuidv4} from 'uuid'
 import { SubmitComment } from "./submit-comment";
 import { SignInModal } from "./sign-in-prompt";
 
-export const Comment = ({ comment, getComments ,prev, level, setTopComments, setColPath, getUserName, signIn }) => {
+export const Comment = ({ comment, getComments, prev, level, setTopComments, setColPath, getUserName, signIn, updateDb, updateObj }) => {
   // Extracting postId from URL parameters
   const { postId } = useParams()
 
@@ -37,53 +37,13 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
     }
     const childCommentSetter = async() => {
       try {
-        setChildComments(await getComments())        
+        setChildComments(await getComments(prevParams))        
       } catch(error) {
         console.error(error)
       }
     }
     childCommentSetter()
   }, [postId, setPrevParams, comment.commentId, prev, showReplyBox])
-
-  // Update the comment object with new upvote/downvote arrays and karma
-  const updatePosts = (primaryVoteArrCopy, secondaryVoteArrCopy = null, primaryArrName, secondaryArrName) => {
-    const clone = {...thisComment} // ! reused in post
-    clone[primaryArrName] = primaryVoteArrCopy
-
-    if (secondaryVoteArrCopy !== null) {
-      clone[secondaryArrName] = secondaryVoteArrCopy
-    }
-    
-    clone.karma = clone.upped.length - clone.downed.length
-    setThisComment(clone)
-  }
-
-  // Update the comment in the database with new upvote/downvote arrays and karma
-  const updateDb = async(primaryArrName, secondaryArrName, primaryVoteArrCopy, secondaryVoteArrCopy, newParams) => {
-    if (primaryArrName === 'upped') { // ! reused in post
-      try {
-        const postUpdate = await doc.apply(null, newParams)
-        await updateDoc(postUpdate, {
-          [primaryArrName]: primaryVoteArrCopy,
-          [secondaryArrName]: secondaryVoteArrCopy,
-          karma: primaryVoteArrCopy.length - secondaryVoteArrCopy.length
-        });
-      } catch(error) {
-        console.error(error)
-      }
-    } else {
-      try {
-        const postUpdate = await doc.apply(null, newParams)
-        await updateDoc(postUpdate, {
-          [primaryArrName]: primaryVoteArrCopy,
-          [secondaryArrName]: secondaryVoteArrCopy,
-          karma: secondaryVoteArrCopy.length - primaryVoteArrCopy.length
-        });
-      } catch(error) {
-        console.error(error)
-      }
-    }
-  }
 
   // Update the comment's upvote/downvote arrays and karma for rendering purposes
   const updateRender = (primaryVoteArrCopy, primaryArrName, secondaryVoteArrCopy, secondaryArrName, primaryIndex, secondaryIndex) => {
@@ -92,10 +52,10 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
       if (!(secondaryIndex < 0)) {
         secondaryVoteArrCopy.splice(secondaryIndex, 1)
       }
-      updatePosts(primaryVoteArrCopy, secondaryVoteArrCopy, primaryArrName, secondaryArrName, thisComment)
+      updateObj(primaryVoteArrCopy, secondaryVoteArrCopy, primaryArrName, secondaryArrName, thisComment, setThisComment)
     } else {
       primaryVoteArrCopy.splice(primaryIndex, 1)
-      updatePosts(primaryVoteArrCopy, null, primaryArrName, secondaryArrName, thisComment)
+      updateObj(primaryVoteArrCopy, null, primaryArrName, secondaryArrName, thisComment, setThisComment)
     }
   }
 
@@ -108,7 +68,11 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
       const secondaryVoteArrCopy = [...secondaryVoteArr]
       
       updateRender(primaryVoteArrCopy, primaryArrName, secondaryVoteArrCopy, secondaryArrName, primaryIndex, secondaryIndex)
-      updateDb(primaryVoteArrCopy, primaryArrName, secondaryVoteArrCopy, secondaryArrName, newParams)
+      try {
+        updateDb(primaryArrName, secondaryArrName, primaryVoteArrCopy, secondaryVoteArrCopy, newParams)
+      } catch (error) {
+        console.error(error)
+      }
     } else {
       setShowSignIn(true)
     }
@@ -183,7 +147,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
       {/* Reply comment form */}
       {showReplyBox ? <SubmitComment showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
       {/* Display child comments */}
-      {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()} getComments={getComments} getUserName={getUserName} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
+      {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()} getComments={getComments} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
       :
       <button onClick={() => getTopComments(prevParams)}>Continue this thread</button>}
     </div>

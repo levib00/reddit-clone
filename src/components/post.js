@@ -6,7 +6,7 @@ import expandImage from '../assets/expand-img.png';
 import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { SignInModal } from "./sign-in-prompt";
 
-export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
+export const Post = ({post, db, getUserName, signInWithPopup, from, updateDb, updateObj}) => {
   const {img, title, topic, timeStamp, id, upped, downed, saved} = post
   
   // State variable
@@ -32,46 +32,9 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }, [thisPost, username.currentUser])
 
-  // Function to update the post state
-  const updatePosts = (updatedArr, secondaryUpdatedArr = null, primaryArrName, secondaryArrName) => {
-    const clone = {...thisPost}
-    clone[primaryArrName] = updatedArr
-
-    if (secondaryUpdatedArr !== null) {
-      clone[secondaryArrName] = secondaryUpdatedArr
-    }
-
-    clone.karma = clone.upped.length - clone.downed.length // change to happen conditionally
-    setThisPost(clone)
-  }
-
-  // Function to update votes in the database
-  const updateVoteDb = async(primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, newParams) => {
-    
-
-    if (primaryArrName === 'upped') {
-      try{
-        const postUpdate = await doc.apply(null, newParams)
-        await updateDoc(postUpdate, {
-          [primaryArrName]: primaryVoteArrCopy,
-          [secondaryArrName]: secondaryVoteArrCopy,
-          karma: primaryVoteArrCopy.length - secondaryVoteArrCopy.length
-        });
-      } catch(error) {
-        console.error(error)
-      }
-    } else {
-      try {
-        const postUpdate = await doc.apply(null, newParams)
-        await updateDoc(postUpdate, {
-          [primaryArrName]: primaryVoteArrCopy,
-          [secondaryArrName]: secondaryVoteArrCopy,
-          karma: secondaryVoteArrCopy.length - primaryVoteArrCopy.length
-        });
-      } catch (error) {
-        console.error(error)
-      }
-    }
+  // Handles pressing of a vote button
+  const handleVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr) => {
+    updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, [db, 'posts', id])
   }
 
   // Function to update votes in the UI and database
@@ -81,10 +44,10 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
       if (!(secondaryIndex < 0)) {
         secondaryVoteArrCopy.splice(secondaryIndex, 1)
       }
-      updatePosts(primaryVoteArrCopy, secondaryVoteArrCopy, primaryArrName, secondaryArrName, thisPost)
+      updateObj(primaryVoteArrCopy, secondaryVoteArrCopy, primaryArrName, secondaryArrName, thisPost,setThisPost)
     } else {
       primaryVoteArrCopy.splice(primaryIndex, 1)
-      updatePosts(primaryVoteArrCopy, null, primaryArrName, secondaryArrName, thisPost)
+      updateObj(primaryVoteArrCopy, null, primaryArrName, secondaryArrName, thisPost, setThisPost)
     }
   }
 
@@ -97,7 +60,11 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
       const secondaryVoteArrCopy = [...secondaryVoteArr]
       
       updateVoteRender(primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, primaryIndex, secondaryIndex)
-      updateVoteDb(primaryArrName, primaryVoteArrCopy, secondaryArrName, secondaryVoteArrCopy, newParams)
+      try {
+        updateDb(primaryArrName, secondaryArrName, primaryVoteArrCopy, secondaryVoteArrCopy, newParams)
+      } catch (error) {
+        console.error(error)
+      }
     } else {
       setShowSignIn(true)
     }
@@ -107,11 +74,10 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
   const updateSavesRender = (savedArrName, savedArrCopy, index) => {
     if (index < 0) {
       savedArrCopy.push(username.currentUser.uid)
-      updatePosts(savedArrCopy, null, savedArrName, thisPost)
     } else {
       savedArrCopy.splice(index, 1)
-      updatePosts(savedArrCopy, null, savedArrName, thisPost)
     }
+    updateObj(savedArrCopy, null, savedArrName, null, thisPost, setThisPost)
   }
 
   // Function to update saves in the database
@@ -139,10 +105,7 @@ export const Post = ({post, db, getUserName, signInWithPopup, from}) => {
     }
   }
 
-  // Handles pressing of a vote button
-  const handleVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr) => {
-    updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, [db, 'posts', id])
-  }
+  
 
   // Adds post to users saved posts
   const savePost = async() => {

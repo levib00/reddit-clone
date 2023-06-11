@@ -7,7 +7,7 @@ import {v4 as uuidv4} from 'uuid'
 import { SideBar } from "./sidebar";
 import { Post } from "./post";
 
-export const PostPage = ({ db, getUserName, signIn, setTopic, posts }) => {
+export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, updateObj }) => {
   const { postId } = useParams()
 
   const [post, setPost] = useState(null)
@@ -71,7 +71,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts }) => {
 
     const postSetter = async() => {
       try {
-        setPost(await getPost())
+        setPost(await getPost(colPath))
       } catch(error) {
         console.error(error)
       }
@@ -81,7 +81,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts }) => {
   }, [db])
 
   // Gets top level comments from database (nested comments will be gotten in comment component)
-  const getComments = async() => { 
+  const getComments = async(colPath) => { 
     const commentCollection = collection.apply(null, colPath)
     const commentSnapshot = await getDocs(commentCollection);
     const commentArr = [];
@@ -94,15 +94,15 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts }) => {
 
   // Sets top level comments in state to be rendered
   useEffect(() => {
-    const commentSetter = async() => {
+    const commentSetter = async(colPath) => {
       try {
-        const commentsClone = [...await getComments()]
+        const commentsClone = [...await getComments(colPath)]
         setComments(sortComments(commentsClone, sortOption.option))
       } catch(error) {
         console.error(error)
       }
     }
-    commentSetter()
+    commentSetter(colPath)
   }, [db, postId, colPath])
 
   return (
@@ -110,7 +110,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts }) => {
       {post ?
         <>
           <SideBar topic={post.topic} />
-          <Post key={uuidv4()} signInWithPopup={signIn} posts={posts} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} />
+          <Post key={uuidv4()} signInWithPopup={signIn} posts={posts} updateObj={updateObj} updateDb={updateDb} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} />
         </>
         : null
       }
@@ -130,7 +130,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts }) => {
         }
         </div>
         {/* Render comments */}
-      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>) : null}
+      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>) : null}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   query,
   where,
   getDoc,
+  updateDoc,
 } from 'firebase/firestore'
 import {
   getAuth,
@@ -22,7 +23,7 @@ import { NavBar } from "./components/nav";
 import { SubmitPage } from "./components/submission-page";
 import { SubmitLink } from "./components/submit-link";
 import { SubmitText } from "./components/submit-text";
-import { LinkPostPage } from "./components/link-post-page";
+import { PostPage } from "./components/post-page";
 
 const App = () => {
   const firebaseConfig = {
@@ -115,15 +116,47 @@ const App = () => {
     }
   }
 
+  // Update the comment in the database with new upvote/downvote arrays and karma
+  const updateDb = async(primaryArrName, secondaryArrName, primaryVoteArrCopy, secondaryVoteArrCopy, newParams) => {
+    if (primaryArrName === 'upped') {
+      const postUpdate = await doc.apply(null, newParams)
+      await updateDoc(postUpdate, {
+        [primaryArrName]: primaryVoteArrCopy,
+        [secondaryArrName]: secondaryVoteArrCopy,
+        karma: primaryVoteArrCopy.length - secondaryVoteArrCopy.length
+      });
+    } else {
+      const postUpdate = await doc.apply(null, newParams)
+      await updateDoc(postUpdate, {
+        [primaryArrName]: primaryVoteArrCopy,
+        [secondaryArrName]: secondaryVoteArrCopy,
+        karma: secondaryVoteArrCopy.length - primaryVoteArrCopy.length
+      });
+    }
+  }
+
+  // Update the post/comment object with new upvote/downvote arrays and karma
+  const updateObj = (primaryVoteArrCopy, secondaryVoteArrCopy = null, primaryArrName, secondaryArrName, toBeUpdated, setToBeUpdated) => {
+    const clone = {...toBeUpdated} // ! reused in post
+    clone[primaryArrName] = primaryVoteArrCopy
+
+    if (secondaryVoteArrCopy !== null) {
+      clone[secondaryArrName] = secondaryVoteArrCopy
+    }
+    
+    clone.karma = clone.upped.length - clone.downed.length
+    setToBeUpdated(clone)
+  }
+
   return (
     <div className="App" style={{overflowAnchor: 'none'}}>
       <BrowserRouter>
         <NavBar topic={topic} signIn={signIn} signOut={signOutUser} getUserName={getUserName} isUserSignedIn={isUserSignedIn}/>
         <Routes>
-          <Route path='/' element={<PostList posts={posts} db={db} signIn={signIn} getUserName={getUserName} setPosts={setPosts} setTopic={setTopic} postSetter={postSetter} />} />
-          <Route path="/topic/:topic"  element={<PostList uid={uid} posts={posts} db={db} signIn={signIn} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />
-          <Route path="/search/:searchQuery"  element={<PostList uid={uid} posts={posts} db={db} signIn={signIn} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />
-          <Route path='/post/:postId' element={<LinkPostPage posts={posts} setPosts={setPosts} db={db} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
+          <Route path='/' element={<PostList posts={posts} db={db} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} setPosts={setPosts} setTopic={setTopic} postSetter={postSetter} />} />
+          <Route path="/topic/:topic"  element={<PostList uid={uid} posts={posts} db={db} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />
+          <Route path="/search/:searchQuery"  element={<PostList uid={uid} posts={posts} db={db} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />
+          <Route path='/post/:postId' element={<PostPage posts={posts} setPosts={setPosts} db={db} updateObj={updateObj} updateDb={updateDb} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
           <Route path='/submit' element={<SubmitPage />}/>
           <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName} signIn={signIn}/>}/>
           <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName} signIn={signIn}/>}/>

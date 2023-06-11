@@ -6,7 +6,7 @@ import { SideBar } from "./sidebar";
 import { useParams } from "react-router-dom";
 
 export const PostList = (props) => {
-  const { setTopic, postSetter, getUserName, db, signIn, uid } = props
+  const { setTopic, postSetter, getUserName, db, signIn, uid, updateDb, updateObj } = props
   // Extract topic or search query from url
   const { topic } = useParams()
   const { searchQuery } = useParams()
@@ -86,7 +86,7 @@ export const PostList = (props) => {
       </div>
       <SideBar topic={topic}/>
       {/* Render posts */}
-      {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} posts={posts} setPosts={setPosts} db={db} username={username} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
+      {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} posts={posts} setPosts={setPosts} db={db} username={username} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
       <Footer extend={extend} loadNext={loadNext}/>
     </div>
   )
