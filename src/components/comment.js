@@ -6,8 +6,10 @@ import { SubmitComment } from "./submit-comment";
 import { SignInModal } from "./sign-in-prompt";
 
 export const Comment = ({ comment, getComments ,prev, level, setTopComments, setColPath, getUserName, signIn }) => {
+  // Extracting postId from URL parameters
   const { postId } = useParams()
 
+  // State variables
   const [thisComment, setThisComment] = useState({...comment})
   const [childComments, setChildComments] = useState()
   const [prevParams, setPrevParams] = useState([...prev, comment.commentId, 'replies'])
@@ -21,6 +23,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
   const [showSignIn, setShowSignIn] = useState(false)
 
   useEffect(() => {
+    // Update upvote and downvote states when the comment or the logged-in user changes
     if (username.currentUser) {
       setIsUpped(thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
       setIsDowned(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
@@ -28,6 +31,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
   }, [thisComment, username.currentUser])
 
   useEffect(() => {
+    // Fetch child comments when the postId, commentId, prev, or showReplyBox changes
     if (!comment.commentId) {
       return
     }
@@ -42,6 +46,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
   }, [postId, setPrevParams, comment.commentId, prev, showReplyBox])
 
   const updatePosts = (primaryVoteArrCopy, secondaryVoteArrCopy = null, primaryArrName, secondaryArrName) => {
+    // Update the comment object with new upvote/downvote arrays and karma
     const clone = {...thisComment}
     clone[primaryArrName] = primaryVoteArrCopy
 
@@ -54,6 +59,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
   }
 
   const updateDb = async(primaryArrName, secondaryArrName, primaryVoteArrCopy, secondaryVoteArrCopy, newParams) => {
+    // Update the comment in the database with new upvote/downvote arrays and karma
     if (primaryArrName === 'upped') {
       try {
         const postUpdate = await doc.apply(null, newParams)
@@ -80,6 +86,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
   }
 
   const updateRender = (primaryVoteArrCopy, primaryArrName, secondaryVoteArrCopy, secondaryArrName, primaryIndex, secondaryIndex) => {
+    // Update the comment's upvote/downvote arrays and karma for rendering purposes
     if (primaryIndex < 0) {
       primaryVoteArrCopy.push(username.currentUser.uid)
       if (!(secondaryIndex < 0)) {
@@ -112,6 +119,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
   }
 
   const remove = async(postPath) => {
+    // Remove the comment from the database
     try {
       const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
       await updateDoc(postUpdate, {
@@ -125,6 +133,7 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
   }
 
   const handleRemove = (prevParams) => {
+    // Handle the deletion of the comment
     remove(prevParams)
     const clone = {...thisComment}
     clone.content = '[deleted]'
@@ -134,21 +143,28 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
   }
 
   const edit = async () => {
+    // Toggle the edit comment form
     setShowEditBox(!showEditBox)
   }
 
   const getTopComments = async(prevs) => { 
+    // Fetch the top-level comments for the thread continuation
     setColPath(prevs)
   }
 
   return (
     <div>
+      {/* Modal for signing in if user is not logged in but tries an action that requires authentication */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a comment'} getUserName={getUserName} /> : null}
       <>
+      {/* Button for upvoting */}
         <button onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}>{isUpped ? 'upped' : 'notUpped'}</button>
+        {/* Button for downvoting */}
         <button onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}>{isDowned ? 'downed' : 'notDowned'}</button>
       </>
+      {/* Display username, karma, and comment timestamp */}
       <div>{thisComment.username}</div> <div>{thisComment.karma}</div> <div>{date}</div>
+      {/* Display comment content */}
       <div>{thisComment.content}</div>
       <div>
         <div onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
@@ -161,8 +177,11 @@ export const Comment = ({ comment, getComments ,prev, level, setTopComments, set
         null
         }
       </div>
+      {/* Edit comment form */}
       {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
+      {/* Reply comment form */}
       {showReplyBox ? <SubmitComment showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
+      {/* Display child comments */}
       {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()} getComments={getComments} getUserName={getUserName} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
       :
       <button onClick={() => getTopComments(prevParams)}>Continue this thread</button>}
