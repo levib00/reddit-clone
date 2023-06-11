@@ -24,7 +24,7 @@ import { SubmitLink } from "./components/submit-link";
 import { SubmitText } from "./components/submit-text";
 import { LinkPostPage } from "./components/link-post-page";
 
-function App() {
+const App = () => {
   const firebaseConfig = {
     apiKey: "AIzaSyCgv64bQQZXvb0MmlcETVC2jzZ0p_-dCtY",
     authDomain: "reddit-clone-ba823.firebaseapp.com",
@@ -42,20 +42,18 @@ function App() {
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  async function signIn() {
+  const signIn = async() => {
     // Sign in Firebase using popup auth and Google as the identity provider.
     var provider = new GoogleAuthProvider();
     await signInWithPopup(getAuth(), provider);
   }
 
-  function signOutUser() {
+  const signOutUser = () => {
     // Sign out of Firebase.
     signOut(getAuth());
   }
 
-  function getUserName() {
-    return getAuth()
-  }
+  const getUserName = () => getAuth()
 
   onAuthStateChanged(getAuth(), (user) => {
     if (user) {
@@ -70,16 +68,18 @@ function App() {
   const [posts, setPosts] = useState(null)
 
   const getPosts = async(topic = 'all', uid, searchQuery = null) => { 
-    // Gets posts for selected topic (defaults to all if no topic is selected).
+    // Gets posts under different circumstances (defaults to all if no topic is selected).
     const postArr = [];
   
     if (topic === 'all' && !searchQuery ) {
+      // Get all posts
       const q = query(collection(db, "posts"))
       const postSnapshot = await getDocs(q);
       postSnapshot.docs.forEach(async doc => {
         postArr.push(doc.data())
       })
     } else if (topic === 'saved' && uid) {
+      // Get saved posts for a specific user
       const q = query(doc(db, "saved", uid))
       const postSnapshot = await getDoc(q);
       const savedPosts = postSnapshot.data().savedPosts
@@ -90,12 +90,14 @@ function App() {
         }
       }
     } else if (searchQuery) {
+      // Get posts based on a search query
       const q = query(collection(db, "posts"), where('title', '>=', searchQuery), where('title', '<=', searchQuery + '\uf8ff'));
       const postSnapshot = await getDocs(q);
       postSnapshot.forEach((doc) => {
         postArr.push(doc.data())
       });
     } else {
+      // Get posts based on a specific topic
       const q = query(collection(db, "posts"), where("topic", "==", topic));
       const postSnapshot = await getDocs(q);
       postSnapshot.forEach((doc) => {
