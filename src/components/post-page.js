@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { SubmitComment } from "./submit-comment";
 import { Comment } from "./comment";
 import { useParams } from "react-router-dom";
@@ -15,7 +15,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   const [colPath, setColPath] = useState([db, 'posts', postId, 'comments'])
   const [sortingOptions] = useState([{option : 'timeStamp', displayed: 'recent'},{option: 'karma', displayed: 'top'}])
   const [sortOption, setSortOption] = useState(sortingOptions[0])
-  const [showDropDown, setShowDropDown] = useState(false)
+  const [sho2DropDown, setSho2DropDown] = useState(false)
 
   // Set the topic to the posts corresponding topic
   useEffect(() => {
@@ -56,7 +56,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   // Handle the selection of a sorting option
   const handleSortSelect = (option) => {
     setSortOption(option)
-    setShowDropDown(!showDropDown)
+    setSho2DropDown(!sho2DropDown)
   }
 
   // Gets and sets current post from database on page load
@@ -106,7 +106,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   }, [db, postId, colPath])
 
   return (
-    <div>
+    <div className={"post-page"}>
       {post ?
         <>
           <SideBar topic={post.topic} />
@@ -115,22 +115,24 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
         : null
       }
       {/* Submit Comment form */}
-      <SubmitComment getUserName={getUserName} signInWithPopup={signIn} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
-      <div>
+      <div className="comments-section">
         {/* Sort dropdown */}
-        <div onClick={() => setShowDropDown(!showDropDown)}>
-          {sortOption.displayed}
+        <div onClick={() => setSho2DropDown(!sho2DropDown)}>
+          sorted by: {sortOption.displayed}
         </div>
-        {/* Sorting options (only shows options that aren't already selected) */}
-        {showDropDown ? 
-          <div>
-            {sortingOptions.map(option => sortOption.option === option.option ? null : <div key={uuidv4()} onClick={() => handleSortSelect(option)}>{option.displayed}</div>)}
-          </div> 
-          : null
-        }
+        <div>
+          {/* Sorting options (only shows options that aren't already selected) */}
+          {sho2DropDown ? 
+            <div className="sort-dropdown">
+              {sortingOptions.map(option => sortOption.option === option.option ? null : <div key={uuidv4()} onClick={() => handleSortSelect(option)}>{option.displayed}</div>)}
+            </div> 
+          : null}
         </div>
-        {/* Render comments */}
-      {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>) : null}
+        <SubmitComment getUserName={getUserName} signInWithPopup={signIn} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
+        {/*//! <div className="return-to-thread-button">return to thread	<div className="return-indicator">→</div></div> */}      
+          {/* Render comments */}
+        {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>) : null}
+      </div>
     </div>
   )
 }
