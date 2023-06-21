@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, memo } from "react";
 import { SubmitComment } from "./submit-comment";
 import { Comment } from "./comment";
 import { useParams } from "react-router-dom";
@@ -13,9 +13,9 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState(null)
   const [colPath, setColPath] = useState([db, 'posts', postId, 'comments'])
-  const [sortingOptions] = useState([{option : 'timeStamp', displayed: 'recent'},{option: 'karma', displayed: 'top'}])
+  const sortingOptions = [{option : 'timeStamp', displayed: 'recent'},{option: 'karma', displayed: 'top'}]
   const [sortOption, setSortOption] = useState(sortingOptions[0])
-  const [sho2DropDown, setSho2DropDown] = useState(false)
+  const [showDropDown, setShowDropDown] = useState(false)
 
   // Set the topic to the posts corresponding topic
   useEffect(() => {
@@ -56,7 +56,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   // Handle the selection of a sorting option
   const handleSortSelect = (option) => {
     setSortOption(option)
-    setSho2DropDown(!sho2DropDown)
+    setShowDropDown(!showDropDown)
   }
 
   // Gets and sets current post from database on page load
@@ -105,24 +105,38 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
     commentSetter(colPath)
   }, [db, postId, colPath])
 
+  const generateComments = (comments) => {
+    if (comments && comments.length > 0) {
+      const array = comments.map(comment => 
+        <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>
+      )
+      console.log('array',<>{array}</>)
+      return <>{array}</>
+    }
+    <div>There are no comments</div>
+  }
+
+  const mainArea = useMemo(() => post ? <Post key={uuidv4()} signInWithPopup={signIn} posts={posts} updateObj={updateObj} updateDb={updateDb} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} /> : <div>Loading</div>, [post]);
+  const commentsList = useMemo(() => generateComments(comments), [comments])
+  
   return (
     <div className={"post-page"}>
       {post ?
         <>
           <SideBar topic={post.topic} />
-          <Post key={uuidv4()} signInWithPopup={signIn} posts={posts} updateObj={updateObj} updateDb={updateDb} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} />
+          {mainArea}
         </>
         : null
       }
       {/* Submit Comment form */}
       <div className="comments-section">
         {/* Sort dropdown */}
-        <div onClick={() => setSho2DropDown(!sho2DropDown)}>
+        <div onClick={() => setShowDropDown(!showDropDown)}>
           sorted by: {sortOption.displayed}
         </div>
         <div>
           {/* Sorting options (only shows options that aren't already selected) */}
-          {sho2DropDown ? 
+          {showDropDown ? 
             <div className="sort-dropdown">
               {sortingOptions.map(option => sortOption.option === option.option ? null : <div key={uuidv4()} onClick={() => handleSortSelect(option)}>{option.displayed}</div>)}
             </div> 
@@ -131,7 +145,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
         <SubmitComment getUserName={getUserName} signInWithPopup={signIn} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
         {/*//! <div className="return-to-thread-button">return to thread	<div className="return-indicator">→</div></div> */}      
           {/* Render comments */}
-        {comments && comments.length > 0 ? comments.map(comment => <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>) : null}
+          {commentsList}
       </div>
     </div>
   )
