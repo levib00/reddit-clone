@@ -3,6 +3,8 @@ import { SubmitPage } from "./submission-page";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
+import camera from "../assets/camera.png"
+import cloud from "../assets/cloud.png"
 
 export const SubmitLink = (props) => {
   const {db, getUserName, signIn} = props
@@ -49,40 +51,42 @@ export const SubmitLink = (props) => {
   }
 
   return (
-    <div>
+    <div className="post-submit">
       {/* Render the sign-in modal if user tries to do an action that requires them to be signed in */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a post'}/> : null}
-      <SubmitPage />
+      <SubmitPage from='link' />
       {/* form for user to fill in content */}
-      <div>
-        <label>url</label>
-        <input type="text"></input>
-      </div>
-      <div>
-        <label>image/video</label>
-        <input
+      <div className="form-field">
+        <p className="image-video-label">image/video</p>
+        <label htmlFor='file-select' className="file-input"><img className="camera submit-icon" src={camera} />Drop here or <div className="open-explorer"><img className="cloud submit-icon" src={cloud} />CHOOSE FILE</div></label>
+        <input required={true}
+         id='file-select'
          type="file" accept="video/*, image/*"
          onChange={(e) => {
           handleFiles(e.target.files[0])
           setSelectedFile(e.target.files[0])
         }}/>
       </div>
-      <div>
-        <label>title</label>
-        <textarea onChange={(e) => {setTitleInput(e.target.value)}} value={titleInput}></textarea>
+      <div className="form-field">
+        <label className="title-label"><span className="required-marker">*</span>title</label>
+        <textarea className="title-textbox" required={true} maxLength={300}  onChange={(e) => {setTitleInput(e.target.value)}} value={titleInput}></textarea>
       </div>
-      <div>
-        <label>topic</label>
-        <input type="text" onChange={(e) => {setTopicInput(e.target.value)}} value={topicInput}></input>
+      <div className="form-field">
+        <label className="topic-label"><span className="required-marker">*</span>topic</label>
+        <input className="topic-textbox" required={true} type="text" onChange={(e) => {setTopicInput(e.target.value)}} value={topicInput}></input>
       </div>
-      <p>
+      <p className="submit-blurb">
         Please try to keep posts appropriate. If you wouldn't share it with your workplace, don't share it here.
         Anything you post is subject to be deleted at any time.
       </p>
       {/* Button to submit post */}
-      <button onClick={() => {
+      <button className="submit-post-button" onClick={() => {
         submitPosts()
       }}>Submit</button>
+      <div className="credit-links">
+        <a href="https://www.flaticon.com/free-icons/photography" title="photography icons">Camera icon created by Freepik - Flaticon</a>
+        <a href="https://www.flaticon.com/free-icons/cloud-computing" title="cloud computing icons">Cloud icon created by Smartline - Flaticon</a>
+      </div>
     </div>
   )
 }

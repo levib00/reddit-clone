@@ -40,25 +40,30 @@ export const SubmitText = (props) => {
   }
 
   return (
-    <div>
+    <div className="post-submit">
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a post'}/> : null}
-      <SubmitPage />
-      <div>
-        <label>title</label>
-        <textarea onChange={(e) => {setTitleInput(e.target.value)}} value={titleInput}></textarea>
+      <SubmitPage from="text"/>
+      <div className="form-field">
+        <label className="title-label"><span className="required-marker">*</span>title</label>
+        <textarea className="title-textbox" onChange={(e) => {setTitleInput(e.target.value)}} value={titleInput}></textarea>
       </div>
-      <div>
-        <label>text</label>
-        <textarea onChange={(e) => {setTextInput(e.target.value)}} value={textInput}></textarea>
+      <div className="form-field">
+        <label className="text-label">text</label>
+        <textarea className="text-textbox" onChange={(e) => {setTextInput(e.target.value)}} value={textInput}></textarea>
       </div>
-      <div>
-        <label>topic</label>
-        <input type="text" onChange={(e) => {setTopicInput(e.target.value)}} value={topicInput}></input>
+      <div className="form-field">
+        <label className="topic-label"><span className="required-marker">*</span>topic</label>
+        <input className="topic-textbox" type="text" onChange={(e) => {setTopicInput(e.target.value)}} value={topicInput}></input>
       </div>
-      <div>
-        anything is saved and is subject to be removed at any time for any reason.
+      <p className="submit-blurb">
+        Please try to keep posts appropriate. If you wouldn't share it with your workplace, don't share it here.
+        Anything you post is subject to be deleted at any time.
+      </p >
+      <button className="submit-post-button" onClick={submitPosts}>Submit</button>
+      <div className="credit-links">
+        <a href="https://www.flaticon.com/free-icons/photography" title="photography icons">Camera icon created by Freepik - Flaticon</a>
+        <a href="https://www.flaticon.com/free-icons/cloud-computing" title="cloud computing icons">Cloud icon created by Smartline - Flaticon</a>
       </div>
-      <button onClick={submitPosts}>Submit</button>
     </div>
   )
 }
