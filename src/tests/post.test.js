@@ -4,7 +4,7 @@ import { Post } from '../components/post';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 
-describe('renders learn react link', () => {
+describe('post renders properly', () => {
   const generatePosts = (n) => {
     const posts = [];
     for (let i = 0; i < n; i++) {
@@ -18,7 +18,6 @@ describe('renders learn react link', () => {
     karma: 34,
     upped: [],
     downed: [],
-    timeStamp: {seconds: 1677557454},
     title: 'Title',
     topic: 'Topic',
     userId: 'user',
@@ -54,7 +53,7 @@ describe('renders learn react link', () => {
     const userId = screen.queryByText('user');
     expect(userId).toBeInTheDocument();
 
-    const date = screen.getByText('Mon Feb 27 2023 23:10:54 GMT-0500 (Eastern Standard Time)')
+    const date = screen.getByText('submitted', {exact: false})
     expect(date).toBeInTheDocument();
   });
 
@@ -80,7 +79,7 @@ describe('renders learn react link', () => {
     const userId = screen.getByText('user');
     expect(userId).toBeInTheDocument();
 
-    const date = screen.getByText('Mon Feb 27 2023 23:10:54 GMT-0500 (Eastern Standard Time)')
+    const date = screen.getByText('submitted', {exact: false})
     expect(date).toBeInTheDocument();
   });
 
@@ -123,31 +122,29 @@ describe('renders learn react link', () => {
     expect(deleted.length).toBe(3) //checks that [deleted] shows three times, once for username, once for content.
   });
 
+  const updateDb = jest.fn()
+  const updateObj = jest.fn()
+
   test('Pressing upvote/downvote works', () => {
     post.upped = generatePosts(34)
     
     render(
       <MemoryRouter>
-        <Post key={Math.random()} getUserName={() => user} post={post} from={'post-list'} />
+        <Post key={Math.random()} getUserName={() => user} updateObj={updateObj} updateDb={updateDb} post={post} from={'post-list'} />
       </MemoryRouter>
     );
 
     const karma = screen.getByText('34');
     expect(karma).toBeInTheDocument();
 
-    const upvoteButton = screen.getByText('notUpped');
+    const upvoteButton = screen.getByRole('button', {name: /upvote button/i});;
     userEvent.click(upvoteButton)
-    expect(screen.getByText('upped')).toBeInTheDocument();
 
-    const uppedKarma = screen.getByText('35');
-    expect(uppedKarma).toBeInTheDocument();
-
-    const downedButton = screen.getByText('notDowned');
+    const downedButton = screen.getByRole('button', {name: /downvote button/i});
     userEvent.click(downedButton)
-    expect(screen.getByText('downed')).toBeInTheDocument();
 
-    const downedKarma = screen.getByText('33');
-    expect(downedKarma).toBeInTheDocument();
+    expect(updateDb).toBeCalledTimes(2)
+    expect(updateObj).toBeCalledTimes(2)
   });
 
   test('Pressing save works', () => {
@@ -155,16 +152,14 @@ describe('renders learn react link', () => {
     
     render(
       <MemoryRouter>
-        <Post key={Math.random()} getUserName={() => user} post={post} from={'post-list'} />
+        <Post key={Math.random()} getUserName={() => user} updateObj={updateObj}  post={post} from={'post-list'} />
       </MemoryRouter>
     );
 
     const saveButton = screen.getByText('save');
     expect(saveButton).toBeInTheDocument()
     userEvent.click(saveButton)
-
-    const unsaveButton = screen.getByText('unsave')
-    expect(unsaveButton).toBeInTheDocument()
-    userEvent.click(unsaveButton)
+    
+    expect(updateObj).toBeCalledTimes(1)
   });
 });

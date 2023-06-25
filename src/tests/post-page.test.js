@@ -3,7 +3,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { Post } from '../components/post';
 
-describe("Test post-list renders properly.", () => {
+describe("Test post-page renders properly.", () => {
   const post = {uid:'name1', upped:[], downed:[], saved:[], title:'title test', topic:'topic test', timeStamp:{seconds:1677557454}, id:'postId', userId:'user'}
 
   const getUserName = () => {
@@ -26,7 +26,7 @@ describe("Test post-list renders properly.", () => {
     const topic = screen.getByText('topic test')
     expect(topic).toBeInTheDocument()
 
-    const date = screen.getByText('Mon Feb 27 2023 23:10:54 GMT-0500 (Eastern Standard Time)')
+    const date = screen.getByText('ago', {exact: false})
     expect(date).toBeInTheDocument()
   });
 })

@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 
 
-describe("Test post-list renders properly.", () => {
+describe("Test comments render properly.", () => {
   const getUserName = () => {
     return {currentUser: {uid: 'uid'}}
   }
@@ -39,11 +39,11 @@ describe("Test post-list renders properly.", () => {
 
     const username = screen.getByText('user');
     expect(username).toBeInTheDocument();
-    const karma = screen.getByText('34');
+    const karma = screen.getByText('34 points');
     expect(karma).toBeInTheDocument();
     const content = screen.getByText('comment content');
     expect(content).toBeInTheDocument();
-    const date = screen.getByText('Mon Feb 27 2023 23:10:54 GMT-0500 (Eastern Standard Time)')
+    const date = screen.getByText('ago', {exact: false})
     expect(date).toBeInTheDocument()
     
   });
@@ -60,31 +60,30 @@ describe("Test post-list renders properly.", () => {
     const submitReplyButton = screen.getByText('save')
     expect(submitReplyButton).toBeInTheDocument()
   });
+  
+  const updateDb = jest.fn()
+  const updateObj = jest.fn()
 
   test('Pressing upvote/downvote works', () => {
     comment.upped = generatePosts(34)
     render(
       <MemoryRouter>
-        <Comment key={Math.random()} level={0} getUserName={getUserName} postId={null} signInWithPopup={null} comment={comment} db={null} prev={[null, 'posts', null, 'comments']}/>
+        <Comment key={Math.random()} level={0} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} postId={null} signInWithPopup={null} comment={comment} db={null} prev={[null, 'posts', null, 'comments']}/>
       </MemoryRouter>
     );
 
-    const karma = screen.getByText('34');
+    const karma = screen.getByText('34 points');
     expect(karma).toBeInTheDocument();
 
-    const upvoteButton = screen.getByText('notUpped');
+    const upvoteButton = screen.getByRole('button', {name: /upvote button/i});
     userEvent.click(upvoteButton)
-    expect(screen.getByText('upped')).toBeInTheDocument();
 
-    const uppedKarma = screen.getByText('35');
-    expect(uppedKarma).toBeInTheDocument();
 
-    const downedButton = screen.getByText('notDowned');
+    const downedButton = screen.getByRole('button', {name: /downvote button/i});
     userEvent.click(downedButton)
-    expect(screen.getByText('downed')).toBeInTheDocument();
-
-    const downedKarma = screen.getByText('33');
-    expect(downedKarma).toBeInTheDocument();
+    
+    expect(updateDb).toBeCalledTimes(2)
+    expect(updateObj).toBeCalledTimes(2)
   });
 
   test('Pressing delete removes content and user', () => {

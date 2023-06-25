@@ -5,7 +5,7 @@ import { SubmitComment } from '../components/submit-comment';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 
-describe('renders learn react link', () => {
+describe('submit comment works properly', () => {
   test('Post content renders with text collapsed', () => {
     const getUserName = () => {
       return {currentUser: null}
@@ -29,7 +29,7 @@ describe('renders learn react link', () => {
     });
     
 
-    const title = screen.getByText('Sign in to submit a comment');
+    const title = screen.getByText('Sign in to submit a comment!');
     expect(title).toBeInTheDocument();
   });
 });
