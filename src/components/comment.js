@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import {v4 as uuidv4} from 'uuid'
 import { SubmitComment } from "./submit-comment";
 import { SignInModal } from "./sign-in-prompt";
+import RelativeTime from '@yaireo/relative-time'
 
 export const Comment = ({ comment, getComments, prev, level, setTopComments, setColPath, getUserName, signIn, updateDb, updateObj }) => {
   // Extracting postId from URL parameters
@@ -15,12 +16,12 @@ export const Comment = ({ comment, getComments, prev, level, setTopComments, set
   const [prevParams, setPrevParams] = useState([...prev, comment.commentId, 'replies'])
   const [showReplyBox, setShowReplyBox] = useState(false)
   const [showEditBox, setShowEditBox] = useState(false)
-  const [date] = useState(comment.timeStamp.seconds ? new Date(comment.timeStamp.seconds*1000).toString() : new Date(Date.now()).toString())
   const [username] = useState(getUserName())
   const [isUpped, setIsUpped] = useState(username.currentUser && thisComment.upped ? thisComment.upped.includes(username.currentUser.uid) : false)
   const [isDowned, setIsDowned] = useState(username.currentUser && thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
   const [showDeletePrompt, setShowDeletePrompt] = useState(false)
   const [showSignIn, setShowSignIn] = useState(false)
+  const [relativeTime] = useState(new RelativeTime())
 
   useEffect(() => {
     // Update upvote and downvote states when the comment or the logged-in user changes
@@ -118,29 +119,41 @@ export const Comment = ({ comment, getComments, prev, level, setTopComments, set
   }
 
   return (
-    <div>
+    <div className={level === 0 ? `top-comment comment` : level % 2 ? 'nested-comment even comment' : 'nested-comment odd comment'}>
       {/* Modal for signing in if user is not logged in but tries an action that requires authentication */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a comment'} getUserName={getUserName} /> : null}
-      <>
-      {/* Button for upvoting */}
-        <button onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}>{isUpped ? 'upped' : 'notUpped'}</button>
-        {/* Button for downvoting */}
-        <button onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}>{isDowned ? 'downed' : 'notDowned'}</button>
-      </>
-      {/* Display username, karma, and comment timestamp */}
-      <div>{thisComment.username}</div> <div>{thisComment.karma}</div> <div>{date}</div>
-      {/* Display comment content */}
-      <div>{thisComment.content}</div>
-      <div>
-        <div onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
-        {!thisComment.isDeleted && username.currentUser && username.currentUser.uid === comment.userId ?
-        <div>
-          {showDeletePrompt ? <div>are you sure? <div onClick={() => handleRemove(prevParams)}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
-          <div onClick={() => edit()}>edit</div>
+      {/* TODO: add button to collapse/expand comment chains. */}
+      <div className="comment-overview"> 
+        <div className="voting-booth">
+        {/* Button for upvoting */}
+          <button className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}></button>
+          {/* Button for downvoting */}
+          <button className={isDowned ? 'arrow downvote downvoted' : 'arrow downvote not-downvoted'} onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}></button>
         </div>
-        : 
-        null
-        }
+        <div>
+          {/* Display username, karma, and comment timestamp */}
+          <div className="comment-data">
+            <div className="comment-username">{thisComment.username}&nbsp;</div>
+            <div className="comment-karma">{thisComment.karma} points</div>
+            <div className="comment-date">&nbsp;{thisComment.timeStamp ? relativeTime.from(new Date(thisComment.timeStamp.seconds*1000)).toString()
+              :
+              null}
+            </div>
+          </div>
+          {/* Display comment content */}
+          <div className="comment-text">{thisComment.content}</div>
+          <div className="comment-actions">
+            <div className="reply-button" onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
+            {!thisComment.isDeleted && username.currentUser && username.currentUser.uid === comment.userId ?
+            <div className="user-comment-actions">
+              {showDeletePrompt ? <div>are you sure? <div className='delete-button' onClick={() => handleRemove(prevParams)}>yes</div> / <div className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
+              <div className="edit-button" onClick={() => edit()}>edit</div>
+            </div>
+            :
+            null
+            }
+          </div>
+        </div>
       </div>
       {/* Edit comment form */}
       {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
@@ -149,7 +162,8 @@ export const Comment = ({ comment, getComments, prev, level, setTopComments, set
       {/* Display child comments */}
       {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()} getComments={getComments} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
       :
-      <button onClick={() => getTopComments(prevParams)}>Continue this thread</button>}
+      <div className="continue-thread-button" onClick={() => getTopComments(prevParams)}>load more comments</div>}
+      
     </div>
   )
 }
