@@ -19,7 +19,8 @@ export const SideBar = ({ topic }) => {
       <div>
         displaying content {topic ? `on the topic of ${topic}` : 'from all topics'}.
       </div>
-      <p>Please try to keep posts. Safe for work (no nudity, excessive violence, gore, hate speech, etc.)</p>
+      <p>This is a personal project to practice web development, not a replacement/competitor to reddit. You can find the source code <a href="https://github.com/levib00/reddit-clone">here.</a></p>
+      <p>Please try to keep posts safe for work (no nudity, excessive violence, gore, hate speech, etc.)</p>
       <p>If you think a post or comment should be removed for violating any of the above rules, or because you own the copyright to any material please send an email to clonedditreport@gmail.com with a link to the post containing said content.</p>
       <Link to='/submit/submit-link'>
         <button className="link-to-submit">Submit a new link</button>
