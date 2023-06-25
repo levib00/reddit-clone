@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, memo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { SubmitComment } from "./submit-comment";
 import { Comment } from "./comment";
 import { useParams } from "react-router-dom";
@@ -110,13 +110,12 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
       const array = comments.map(comment => 
         <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>
       )
-      console.log('array',<>{array}</>)
       return <>{array}</>
     }
     <div>There are no comments</div>
   }
 
-  const mainArea = useMemo(() => post ? <Post key={uuidv4()} signInWithPopup={signIn} posts={posts} updateObj={updateObj} updateDb={updateDb} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} /> : <div>Loading</div>, [post]);
+  const mainArea = useMemo(() => post ? <Post key={uuidv4()} signIn={signIn} posts={posts} updateObj={updateObj} updateDb={updateDb} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} /> : <div>Loading</div>, [post]);
   const commentsList = useMemo(() => generateComments(comments), [comments])
   
   return (
@@ -130,15 +129,14 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
       }
       {/* Submit Comment form */}
       <div className="comments-section">
+      <div className="dotted-separator"></div>
         {/* Sort dropdown */}
-        <div onClick={() => setShowDropDown(!showDropDown)}>
-          sorted by: {sortOption.displayed}
-        </div>
-        <div>
+        <div className="sort-comments" >
+          sorted by: <span className="current-sort" onClick={() => setShowDropDown(!showDropDown)}>{sortOption.displayed}</span>
           {/* Sorting options (only shows options that aren't already selected) */}
           {showDropDown ? 
             <div className="sort-dropdown">
-              {sortingOptions.map(option => sortOption.option === option.option ? null : <div key={uuidv4()} onClick={() => handleSortSelect(option)}>{option.displayed}</div>)}
+              {sortingOptions.map(option => sortOption.option === option.option ? null : <div className="sort-option" key={uuidv4()} onClick={() => handleSortSelect(option)}>{option.displayed}</div>)}
             </div> 
           : null}
         </div>
