@@ -3,6 +3,7 @@ import { SubmitPage } from "./submission-page";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
+import { Link } from "react-router-dom";
 
 export const SubmitText = (props) => {
   const {db, getUserName, signIn} = props
@@ -59,7 +60,11 @@ export const SubmitText = (props) => {
         Please try to keep posts appropriate. If you wouldn't share it with your workplace, don't share it here.
         Anything you post is subject to be deleted at any time.
       </p >
-      <button className="submit-post-button" onClick={submitPosts}>Submit</button>
+      <Link to={'/'} onClick={() => submitPosts()}>
+        <button className="submit-post-button" >
+          Submit
+        </button>
+      </Link>
       <div className="credit-links">
         <a href="https://www.flaticon.com/free-icons/photography" title="photography icons">Camera icon created by Freepik - Flaticon</a>
         <a href="https://www.flaticon.com/free-icons/cloud-computing" title="cloud computing icons">Cloud icon created by Smartline - Flaticon</a>

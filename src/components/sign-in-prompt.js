@@ -2,13 +2,20 @@ import React from "react";
 
 export const SignInModal = ({ from, signIn, setShowSignIn }) => {
   return (
-    <>
-      {/* message changes based on what action the user was trying to do. */}
-      Sign in to {from}
-      {/* Creates popup user can use to sign in */}
-      <button onClick={signIn}>Sign in</button> 
-      {/* Close form */}
-      <button onClick={() => setShowSignIn(false)}>cancel</button>
-    </>
+    <div className="prevent-click-for-prompt" onClick={() => setShowSignIn(false)}>
+      <div className="sign-in-prompt" onClick={(e) => e.stopPropagation()}>
+        {/* message changes based on what action the user was trying to do. */}
+        <div className="sign-in-text">Sign in to {from}!</div>
+        <div className="prompt-button-container">
+          {/* Creates popup user can use to sign in */}
+          <button className="prompt-sign-in-button prompt-button" onClick={() => {
+            signIn()
+            setShowSignIn(false)
+          }}>Sign in</button>
+          {/* Close form */}
+          <button className="prompt-cancel-button prompt-button" onClick={() => setShowSignIn(false)}>cancel</button>
+        </div>
+      </div>
+    </div>
   )
 }

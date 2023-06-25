@@ -78,16 +78,18 @@ export const PostList = (props) => {
   }
   
   return (
-    <div>
-      {/* Sorting options */}
-      <div>
-        <button onClick={() => setSortOption('timeStamp')}>new</button>
-        <button onClick={() => setSortOption('karma')}>top</button>
-      </div>
+    <div className="post-list-page">
       <SideBar topic={topic}/>
-      {/* Render posts */}
-      {posts ? posts.slice(start, numberOfPosts).map(post => React.isValidElement(post) ? post : <Post key={uuidv4()} posts={posts} setPosts={setPosts} db={db} username={username} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
-      <Footer extend={extend} loadNext={loadNext}/>
+      <div className="post-list">
+        {/* Sorting options */}
+        <div className="sort-post-list">
+          <button className={sortOption === 'timeStamp' ? "sort-button selected-sort" : 'sort-button'} onClick={() => setSortOption('timeStamp')}>new</button>
+          <button className={sortOption === 'karma' ? "sort-button selected-sort" : 'sort-button'} onClick={() => setSortOption('karma')}>top</button>
+        </div>
+        {/* Render posts */}
+        {posts ? posts.slice(start, numberOfPosts).map((post, index) => React.isValidElement(post) ? post : <Post key={uuidv4()} index={index} posts={posts} setPosts={setPosts} db={db} username={username} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
+        <Footer extend={extend} loadNext={loadNext}/>{/*//TODO: only show footer if # of posts exceeds 25 */}
+      </div>
     </div>
   )
 }

@@ -69,13 +69,13 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
   }
 
   return (
-    <div>
+    <div className="submit-comment">
       {/* Render the sign-in modal if showSignIn is true */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a comment'} getUserName={getUserName} /> : null}
       {/* Textarea for entering the comment */}
-      <textarea onChange={(e) => setCommentInput(e.target.value)} value={commentInput}></textarea>
+      <textarea className="comment-textbox" onChange={(e) => setCommentInput(e.target.value)} value={commentInput}></textarea>
       {/* Button to save the comment */}
-      <button onClick={handleSubmit}>save</button>
+      <button className="submit-comment-button" onClick={handleSubmit}>save</button>
     </div>
   )
 }

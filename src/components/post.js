@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import expandText from '../assets/text-image.png'
-import collapse from '../assets/collapse.png';
-import expandImage from '../assets/expand-img.png';
 import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { SignInModal } from "./sign-in-prompt";
+import RelativeTime from '@yaireo/relative-time'
 
-export const Post = ({post, db, getUserName, signInWithPopup, from, updateDb, updateObj}) => {
+export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, index}) => {
   const {img, title, topic, timeStamp, id, upped, downed, saved} = post
   
   // State variable
@@ -17,9 +15,10 @@ export const Post = ({post, db, getUserName, signInWithPopup, from, updateDb, up
   const [isUpped, setIsUpped] = useState(username.currentUser && upped.includes(username.currentUser.uid))
   const [isDowned, setIsDowned] = useState(downed.includes(username.currentUser && username.currentUser.uid))
   const [isSaved, setIsSaved] = useState(saved.includes(username.currentUser && username.currentUser.uid))
-  const [showSignIn, setShowSignIn] = useState(null)
+  const [showSignIn, setShowSignIn] = useState(false)
   const [showDeletePrompt, setShowDeletePrompt] = useState(false)
-  
+  const [relativeTime] = useState(new RelativeTime())
+
   useEffect(() => {
     setIsImage(img ? true : false)
   }, [img])
@@ -105,8 +104,6 @@ export const Post = ({post, db, getUserName, signInWithPopup, from, updateDb, up
     }
   }
 
-  
-
   // Adds post to users saved posts
   const savePost = async() => {
     try {
@@ -173,66 +170,65 @@ export const Post = ({post, db, getUserName, signInWithPopup, from, updateDb, up
       console.error()
     }
   }
-
   return (
-    <div>
-      {/* Render sign in prompt that shows when users tries an action that requires them to be signed in */}
-      {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signInWithPopup={signInWithPopup} from={'submit a comment'} getUserName={getUserName} /> : null}
-      {/* Render upvote/downvote buttons and karma */}
-      <div>
-        <button onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}>
-          {isUpped ? 'upped' : 'notUpped'}
-        </button>
-        <p>{thisPost.karma}</p>
-        <button onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}>
-          {isDowned ? 'downed' : 'notDowned'}
-        </button>
-      </div>
-      {/* Render image if the post has one to render */}
-      { isImage ? <img src={img} alt={`${title}`}/> : null}
-      <div>
-        {/* Render title and topic */}
-        <div>
-          <div>{thisPost.title}</div>
-          <div><Link to={`/topic/${topic}`}>{topic}</Link></div>
-        </div>
-        <div> {/* Maybe move background image of below button into css backgrounds */}
+  <div className={ isImage ? expanded ? "post expanded" : "post" : expanded ? "post text-post expanded" : "post text-post" }>
+    {/* Render sign in prompt that shows when users tries an action that requires them to be signed in */}
+    {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a comment'} getUserName={getUserName} /> : null}
+    {/* Render upvote/downvote buttons and karma */}
+    <div className="post-index">{index}</div>
+    <div className="voting-booth">
+      <button className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}></button>
+      <div className="karma">{thisPost.karma}</div>
+      <button className={isDowned ? 'arrow downvote downvoted' : 'arrow downvote not-downvoted'} onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}></button>
+    </div>
+    {/* Render image if the post has one to render */}
+    { isImage ? <img className="thumbnail" src={img} alt={`${title}`}/> : <div className="thumbnail default-text"></div>}
+    <div className="post-top">
+      {/* Render title and topic */}
+      <div className="title">{thisPost.title}</div>
+      <div className="post-overview"> {/* Maybe move background image of below button into css backgrounds */}
         {/* Expand/Collapse button to show more or less of the posts content */}
-          {from === 'post-list' ?
-           <button className={'expand/collapse'} onClick={() => setExpanded(!expanded)}>
-            {expanded ? <img src={collapse}></img> : isImage ? <img src={expandImage}></img> : <img src={expandText}></img>}
-           </button> 
-           : null} {/* double check this. */}
-          <div>
-            {/* Render post timestamp and username of poster */}
-            <div>
-              <div>{timeStamp ? new Date(timeStamp.seconds*1000).toString() : null}</div>
-              <div>{thisPost.userId}</div>
+        {from === 'post-list' || isImage ?
+        <button className={(expanded ? 'collapse expand-collapse' : isImage ? 'expand-image expand-collapse' : 'expand-text expand-collapse')} onClick={() => setExpanded(!expanded)}></button>
+        : null}
+        <div className="post-data">
+          {/* Render post timestamp and username of poster */}
+          <div className="post-info">{/* //TODO: find the right word here */}
+            <div>submitted {timeStamp ? relativeTime.from(new Date(timeStamp.seconds*1000)).toString() : null}
+              &nbsp;by&nbsp;
+              <span className="post-username">{thisPost.userId}</span>
+              &nbsp;to&nbsp;
+              <Link to={`/topic/${topic}`}><span className="post-topic">{topic}</span></Link>
             </div>
-            {/* Render link to comments */}
+          </div>
+          {/* Render link to comments */}
+          <div className="post-actions">
             <div>
-              <Link to={`/post/${id}`}>view comments</Link>
+              <Link to={`/post/${id}`} className="comments-button">view comments</Link> {/*// TODO: add field to thisPost that holds No. of comments, so it could be displayed here. would have to increment this with each new comment submission */}
             </div>
             {/* Render button to save/unpost post */}
-            {!isSaved ? <div onClick={() => handleSave('saved', thisPost.saved)}>
+            {!isSaved ? <div className="save-button" onClick={() => handleSave('saved', thisPost.saved)}>
               save
-            </div> 
+            </div>
             :
-            <div onClick={() => handleUnsave('saved', thisPost.saved)}>
+            <div className="save-button" onClick={() => handleUnsave('saved', thisPost.saved)}>
               unsave
             </div>}
             {/* If post is not deleted and the post belongs to the current user, Render delete and edit buttons */}
             {!thisPost.isDeleted && username.currentUser && username.currentUser.uid === thisPost.uid ?
             <div>
-              {showDeletePrompt ? <div>are you sure? <div onClick={() => handleRemove([db, 'posts', id])}>yes</div> / <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
+              {showDeletePrompt ? <div className="confirm-delete">are you sure?&nbsp;<div className="delete-button" onClick={() => handleRemove([db, 'posts', id])}>yes</div>&nbsp;/&nbsp;<div className="delete-button" onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div className="delete-button" onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
             </div>
-            : 
+            :
             null}
             {/* Shows content based on whether content is expanded/collapsed */}
-            {expanded ? isImage ? <img src={img} alt={`${title}`}/> : <div>{thisPost.text}</div> : null }
           </div>
         </div>
       </div>
+      <div>
+        {expanded ? isImage ? <img className="main-post-image" src={img} alt={`${title}`}/> : <div className="post-text">{thisPost.text}</div> : null }
+      </div>
     </div>
+  </div>
   )
 }
