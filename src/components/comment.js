@@ -126,18 +126,18 @@ export const Comment = ({ comment, setIsExpandedThread, getComments, prev, level
       <div className="comment-overview"> 
         <div className="voting-booth">
         {/* Button for upvoting */}
-          <button className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}></button>
+          <button aria-label="upvote button" className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}></button>
           {/* Button for downvoting */}
-          <button className={isDowned ? 'arrow downvote downvoted' : 'arrow downvote not-downvoted'} onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}></button>
+          <button aria-label="downvote button" className={isDowned ? 'arrow downvote downvoted' : 'arrow downvote not-downvoted'} onClick={() => handleVote('downed', thisComment.downed, 'upped', thisComment.upped)}></button>
         </div>
         <div>
           {/* Display username, karma, and comment timestamp */}
           <div className="comment-data">
             <div className="comment-username">{thisComment.username}&nbsp;</div>
             <div className="comment-karma">{thisComment.karma} points</div>
-            <div className="comment-date">&nbsp;{thisComment.timeStamp ? relativeTime.from(new Date(thisComment.timeStamp.seconds*1000)).toString()
+            <div  className="comment-date">&nbsp;{thisComment.timeStamp ? relativeTime.from(new Date(thisComment.timeStamp.seconds*1000)).toString()
               :
-              null}
+              'date'}
             </div>
           </div>
           {/* Display comment content */}
