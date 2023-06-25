@@ -12,7 +12,7 @@ export const PostList = (props) => {
   const { searchQuery } = useParams()
 
   // State variables
-  const [posts, setPosts] = useState(null)
+  const [posts, setPosts] = useState([])
   const [numberOfPosts, setNumberOfPosts] = useState(25);
   const [username] = useState(getUserName())
   const [sortOption, setSortOption] = useState('timeStamp')
