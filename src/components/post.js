@@ -177,9 +177,9 @@ export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, 
     {/* Render upvote/downvote buttons and karma */}
     <div className="post-index">{index}</div>
     <div className="voting-booth">
-      <button className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}></button>
+      <button aria-label="upvote button" className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}></button>
       <div className="karma">{thisPost.karma}</div>
-      <button className={isDowned ? 'arrow downvote downvoted' : 'arrow downvote not-downvoted'} onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}></button>
+      <button aria-label="downvote button" className={isDowned ? 'arrow downvote downvoted' : 'arrow downvote not-downvoted'} onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}></button>
     </div>
     {/* Render image if the post has one to render */}
     { isImage ? <img className="thumbnail" src={img} alt={`${title}`}/> : <div className="thumbnail default-text"></div>}
@@ -193,7 +193,7 @@ export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, 
         : null}
         <div className="post-data">
           {/* Render post timestamp and username of poster */}
-          <div className="post-info">{/* //TODO: find the right word here */}
+          <div className="post-info">
             <div>submitted {timeStamp ? relativeTime.from(new Date(timeStamp.seconds*1000)).toString() : null}
               &nbsp;by&nbsp;
               <span className="post-username">{thisPost.userId}</span>
