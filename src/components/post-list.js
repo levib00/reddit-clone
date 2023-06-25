@@ -88,7 +88,7 @@ export const PostList = (props) => {
         </div>
         {/* Render posts */}
         {posts ? posts.slice(start, numberOfPosts).map((post, index) => React.isValidElement(post) ? post : <Post key={uuidv4()} index={index} posts={posts} setPosts={setPosts} db={db} username={username} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
-        <Footer extend={extend} loadNext={loadNext}/>{/*//TODO: only show footer if # of posts exceeds 25 */}
+        {posts.length > numberOfPosts ? <Footer extend={extend} loadNext={loadNext}/> : null}
       </div>
     </div>
   )
