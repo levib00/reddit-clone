@@ -11,7 +11,7 @@ export const SubmitLink = (props) => {
   const {db, getUserName, signIn} = props
 
   // State variables
-  const [selectedFile, setSelectedFile] = useState(undefined);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [titleInput, setTitleInput] = useState('')
   const [topicInput, setTopicInput] = useState('')
   const [showSignIn, setShowSignIn] = useState(false)
@@ -29,16 +29,19 @@ export const SubmitLink = (props) => {
 
   // Function to submit the link post
   const submitPosts = async() => {
-    const username = await getUserName().currentUser.displayName
+    if(topicInput === '' || titleInput === '' ) {
+      return
+    }
+    const username = await getUserName()
     if (username !== null) {
       const postId = uuidv4()
       await setDoc(doc(db, 'posts', postId), {
-        img: selectedFile,
+        img: selectedFile ? selectedFile : null,
         karma: 0,
         timeStamp: serverTimestamp(),
         title: titleInput,
         topic: topicInput,
-        userId: username,
+        userId: username.currentUser.displayName,
         id: postId,
         upped: [],
         downed: [],
@@ -57,6 +60,7 @@ export const SubmitLink = (props) => {
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a post'}/> : null}
       <SubmitPage from='link' />
       {/* form for user to fill in content */}
+      <span className="required-marker">* required</span>
       <div className="form-field">
         <p className="image-video-label">image/video</p>
         <label htmlFor='file-select' className="file-input"><img className="camera submit-icon" src={camera} />Drop here or <div className="open-explorer"><img className="cloud submit-icon" src={cloud} />CHOOSE FILE</div></label>
@@ -81,7 +85,12 @@ export const SubmitLink = (props) => {
         Anything you post is subject to be deleted at any time.
       </p>
       {/* Button to submit post */}
-      <Link to={'/'} onClick={() => submitPosts()}>
+      <Link to={'/'}  onClick={(e) => {
+        if(topicInput === '' || titleInput === '' ) {
+          e.preventDefault()
+        }
+        submitPosts()
+        }}>
         <button className="submit-post-button" >
           Submit
         </button>

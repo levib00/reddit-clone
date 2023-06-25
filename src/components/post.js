@@ -10,6 +10,7 @@ export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, 
   // State variable
   const [username] = useState(getUserName())
   const [isImage, setIsImage] = useState(null)
+  const [hasText, setHasText] = useState(null)
   const [thisPost, setThisPost] = useState({...post})
   const [expanded, setExpanded] = useState(from === 'post-page' ? true : false)
   const [isUpped, setIsUpped] = useState(username.currentUser && upped.includes(username.currentUser.uid))
@@ -22,6 +23,10 @@ export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, 
   useEffect(() => {
     setIsImage(img ? true : false)
   }, [img])
+
+  useEffect(() => {
+    setHasText(thisPost.text ? true : false)
+  }, [thisPost.text])
 
   useEffect(() => {
     if (username.currentUser) {
@@ -188,7 +193,7 @@ export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, 
       <div className="title">{thisPost.title}</div>
       <div className="post-overview"> {/* Maybe move background image of below button into css backgrounds */}
         {/* Expand/Collapse button to show more or less of the posts content */}
-        {from === 'post-list' || isImage ?
+        {(from === 'post-list' || isImage) && (isImage === true || hasText) ?
         <button className={(expanded ? 'collapse expand-collapse' : isImage ? 'expand-image expand-collapse' : 'expand-text expand-collapse')} onClick={() => setExpanded(!expanded)}></button>
         : null}
         <div className="post-data">
@@ -226,7 +231,7 @@ export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, 
         </div>
       </div>
       <div>
-        {expanded ? isImage ? <img className="main-post-image" src={img} alt={`${title}`}/> : <div className="post-text">{thisPost.text}</div> : null }
+        {expanded && (isImage || hasText) ? isImage ? <img className="main-post-image" src={img} alt={`${title}`}/> : <div className="post-text">{thisPost.text}</div> : null }
       </div>
     </div>
   </div>

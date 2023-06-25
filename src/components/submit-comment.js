@@ -42,6 +42,9 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
 
   // Function to handle the form submission
   const handleSubmit = async () => {
+    if (commentInput.length === '') {
+      return
+    }
     const commentId = uuidv4()
     let username = getUserName().currentUser
     if (username !== null) {
@@ -62,10 +65,10 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
         submitComment(newComment, commentId);
         setComments([...comments, newComment])
       } 
+      clearBox();
     } else {
       setShowSignIn(true)
     }
-    clearBox();
   }
 
   return (

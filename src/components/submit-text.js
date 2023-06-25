@@ -16,6 +16,9 @@ export const SubmitText = (props) => {
 
   // Function to submit the posts to the database
   const submitPosts = async() => {
+    if(topicInput === '' || titleInput === '' ) {
+      return
+    }
     const username = await getUserName()
     if (username !== null) {
       const postId = uuidv4()
@@ -60,7 +63,12 @@ export const SubmitText = (props) => {
         Please try to keep posts appropriate. If you wouldn't share it with your workplace, don't share it here.
         Anything you post is subject to be deleted at any time.
       </p >
-      <Link to={'/'} onClick={() => submitPosts()}>
+      <Link to={'/'}  onClick={(e) => {
+          if(topicInput === '' || titleInput === '' ) {
+            e.preventDefault()
+          }
+          submitPosts()
+        }}>
         <button className="submit-post-button" >
           Submit
         </button>
