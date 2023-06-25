@@ -203,13 +203,13 @@ export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, 
               &nbsp;by&nbsp;
               <span className="post-username">{thisPost.userId}</span>
               &nbsp;to&nbsp;
-              <Link to={`/topic/${topic}`}><span className="post-topic">{topic}</span></Link>
+              <Link to={`/reddit-clone/topic/${topic}`}><span className="post-topic">{topic}</span></Link>
             </div>
           </div>
           {/* Render link to comments */}
           <div className="post-actions">
             <div>
-              <Link to={`/post/${id}`} className="comments-button">view comments</Link> {/*// TODO: add field to thisPost that holds No. of comments, so it could be displayed here. would have to increment this with each new comment submission */}
+              <Link to={`/reddit-clone/post/${id}`} className="comments-button">view comments</Link> {/*// TODO: add field to thisPost that holds No. of comments, so it could be displayed here. would have to increment this with each new comment submission */}
             </div>
             {/* Render button to save/unpost post */}
             {!isSaved ? <div className="save-button" onClick={() => handleSave('saved', thisPost.saved)}>

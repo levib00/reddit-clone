@@ -85,7 +85,7 @@ export const SubmitLink = (props) => {
         Anything you post is subject to be deleted at any time.
       </p>
       {/* Button to submit post */}
-      <Link to={'/'}  onClick={(e) => {
+      <Link to={'/reddit-clone/'}  onClick={(e) => {
         if(topicInput === '' || titleInput === '' ) {
           e.preventDefault()
         }

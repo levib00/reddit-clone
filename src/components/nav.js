@@ -12,7 +12,7 @@ export const NavBar = (props) => {
     <div className="nav">
       <div className="hero">
         {/* Link to the homepage and logo */}
-       <Link to='/'>cloneddit</Link> 
+       <Link to='/reddit-clone/'>cloneddit</Link> 
       </div>
       <div className="topic">
         {/* Display the topic */}

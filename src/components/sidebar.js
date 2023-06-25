@@ -10,7 +10,7 @@ export const SideBar = ({ topic }) => {
       {/* Input field for the search query */}
       <input className="search-bar" type="text" placeholder="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
       {/* Link to perform the search using the search query */}
-      <Link to={`/search/${searchQuery}`}><button className="search-button"></button></Link>
+      <Link to={`/reddit-clone/search/${searchQuery}`}><button className="search-button"></button></Link>
       {/* Heading displaying the current topic or "all" if not specified */}
        {/* Link to submit a new link */}
       
@@ -22,11 +22,11 @@ export const SideBar = ({ topic }) => {
       <p>This is a personal project to practice web development, not a replacement/competitor to reddit. You can find the source code <a href="https://github.com/levib00/reddit-clone">here.</a></p>
       <p>Please try to keep posts safe for work (no nudity, excessive violence, gore, hate speech, etc.)</p>
       <p>If you think a post or comment should be removed for violating any of the above rules, or because you own the copyright to any material please send an email to clonedditreport@gmail.com with a link to the post containing said content.</p>
-      <Link to='/submit/submit-link'>
+      <Link to='/reddit-clone/submit/submit-link'>
         <button className="link-to-submit">Submit a new link</button>
       </Link>
       {/* Link to submit a new text post */}
-      <Link to='/submit/submit-text'>
+      <Link to='/reddit-clone/submit/submit-text'>
         <button className="link-to-submit">Submit a new text post</button>
       </Link>
       <a href="https://www.flaticon.com/free-icons/search" title="search icons">Search icons created by Royyan Wijaya - Flaticon</a>
