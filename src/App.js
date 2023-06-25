@@ -71,6 +71,9 @@ const App = () => {
   const getPosts = async(topic = 'all', uid, searchQuery = null) => { 
     // Gets posts under different circumstances (defaults to all if no topic is selected).
     const postArr = [];
+
+    /*// TODO: let a user show posts from "subscribed" topics. would need to make a doc in the db to store each users subscriptions.
+    then query for posts with that topic. annoying part would be rendering the subscription button to change if it's found within the users subs. */
   
     if (topic === 'all' && !searchQuery ) {
       // Get all posts
@@ -137,7 +140,7 @@ const App = () => {
 
   // Update the post/comment object with new upvote/downvote arrays and karma
   const updateObj = (primaryVoteArrCopy, secondaryVoteArrCopy = null, primaryArrName, secondaryArrName, toBeUpdated, setToBeUpdated) => {
-    const clone = {...toBeUpdated} // ! reused in post
+    const clone = {...toBeUpdated}
     clone[primaryArrName] = primaryVoteArrCopy
 
     if (secondaryVoteArrCopy !== null) {
@@ -156,7 +159,7 @@ const App = () => {
           <Route path='/' element={<PostList posts={posts} db={db} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} setPosts={setPosts} setTopic={setTopic} postSetter={postSetter} />} />
           <Route path="/topic/:topic"  element={<PostList uid={uid} posts={posts} db={db} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />
           <Route path="/search/:searchQuery"  element={<PostList uid={uid} posts={posts} db={db} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} setTopic={setTopic} postSetter={postSetter} /> } />
-          <Route path='/post/:postId' element={<PostPage posts={posts} setPosts={setPosts} db={db} updateObj={updateObj} updateDb={updateDb} getUserName={getUserName} signInWithPopup={signInWithPopup} setTopic={setTopic}/>}/>
+          <Route path='/post/:postId' element={<PostPage posts={posts} setPosts={setPosts} db={db} updateObj={updateObj} updateDb={updateDb} getUserName={getUserName} signIn={signIn} setTopic={setTopic}/>}/>
           <Route path='/submit' element={<SubmitPage />}/>
           <Route path='/submit/submit-text' element={<SubmitText db={db} getUserName={getUserName} signIn={signIn}/>}/>
           <Route path='/submit/submit-link' element={<SubmitLink db={db} getUserName={getUserName} signIn={signIn}/>}/>
