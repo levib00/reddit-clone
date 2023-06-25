@@ -6,7 +6,7 @@ import { SubmitComment } from "./submit-comment";
 import { SignInModal } from "./sign-in-prompt";
 import RelativeTime from '@yaireo/relative-time'
 
-export const Comment = ({ comment, getComments, prev, level, setTopComments, setColPath, getUserName, signIn, updateDb, updateObj }) => {
+export const Comment = ({ comment, setIsExpandedThread, getComments, prev, level, setTopComments, setColPath, getUserName, signIn, updateDb, updateObj }) => {
   // Extracting postId from URL parameters
   const { postId } = useParams()
 
@@ -160,10 +160,12 @@ export const Comment = ({ comment, getComments, prev, level, setTopComments, set
       {/* Reply comment form */}
       {showReplyBox ? <SubmitComment showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
       {/* Display child comments */}
-      {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()} getComments={getComments} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
+      {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()} setIsExpandedThread={setIsExpandedThread} getComments={getComments} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
       :
-      <div className="continue-thread-button" onClick={() => getTopComments(prevParams)}>load more comments</div>}
-      
+      <div className="continue-thread-button" onClick={() => {
+        setIsExpandedThread(true)
+        getTopComments(prevParams)}
+      }>load more comments</div>}
     </div>
   )
 }

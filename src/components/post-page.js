@@ -16,6 +16,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   const sortingOptions = [{option : 'timeStamp', displayed: 'recent'},{option: 'karma', displayed: 'top'}]
   const [sortOption, setSortOption] = useState(sortingOptions[0])
   const [showDropDown, setShowDropDown] = useState(false)
+  const [isExpandedThread, setIsExpandedThread] = useState(false)
 
   // Set the topic to the posts corresponding topic
   useEffect(() => {
@@ -108,7 +109,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   const generateComments = (comments) => {
     if (comments && comments.length > 0) {
       const array = comments.map(comment => 
-        <Comment key={uuidv4()} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>
+        <Comment key={uuidv4()} setIsExpandedThread={setIsExpandedThread} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>
       )
       return <>{array}</>
     }
@@ -141,7 +142,10 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
           : null}
         </div>
         <SubmitComment getUserName={getUserName} signInWithPopup={signIn} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
-        {/*//! <div className="return-to-thread-button">return to thread	<div className="return-indicator">→</div></div> */}      
+        {isExpandedThread ? <div className="return-to-thread-button" onClick={() => {
+          setIsExpandedThread(false);
+          setColPath([db, 'posts', postId, 'comments'])
+        }}>return to thread	<div className="return-indicator">→</div></div> : null}
           {/* Render comments */}
           {commentsList}
       </div>
