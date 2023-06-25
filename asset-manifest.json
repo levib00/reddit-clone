@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/my-app/static/css/main.0f45123d.css",
-    "main.js": "/my-app/static/js/main.3295bd7c.js",
-    "static/media/default-posts.png": "/my-app/static/media/default-posts.8c7437502c904db5546c.png",
-    "static/media/cloud.png": "/my-app/static/media/cloud.531d47588904bdecce54.png",
-    "static/media/search.png": "/my-app/static/media/search.a27091ef0c45faf8a66e.png",
-    "index.html": "/my-app/index.html",
-    "main.0f45123d.css.map": "/my-app/static/css/main.0f45123d.css.map",
-    "main.3295bd7c.js.map": "/my-app/static/js/main.3295bd7c.js.map"
+    "main.css": "/reddit-clone/static/css/main.90de2453.css",
+    "main.js": "/reddit-clone/static/js/main.466ee9be.js",
+    "static/media/default-posts.png": "/reddit-clone/static/media/default-posts.8c7437502c904db5546c.png",
+    "static/media/cloud.png": "/reddit-clone/static/media/cloud.531d47588904bdecce54.png",
+    "static/media/search.png": "/reddit-clone/static/media/search.a27091ef0c45faf8a66e.png",
+    "index.html": "/reddit-clone/index.html",
+    "main.90de2453.css.map": "/reddit-clone/static/css/main.90de2453.css.map",
+    "main.466ee9be.js.map": "/reddit-clone/static/js/main.466ee9be.js.map"
   },
   "entrypoints": [
-    "static/css/main.0f45123d.css",
-    "static/js/main.3295bd7c.js"
+    "static/css/main.90de2453.css",
+    "static/js/main.466ee9be.js"
   ]
 }
