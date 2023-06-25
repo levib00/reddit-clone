@@ -45,8 +45,11 @@ export const SubmitText = (props) => {
 
   return (
     <div className="post-submit">
+       {/* Render the sign-in modal if user tries to do an action that requires them to be signed in */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a post'}/> : null}
       <SubmitPage from="text"/>
+      {/* form for user to fill in content */}
+      <span className="required-marker">* required</span>
       <div className="form-field">
         <label className="title-label"><span className="required-marker">*</span>title</label>
         <textarea className="title-textbox" onChange={(e) => {setTitleInput(e.target.value)}} value={titleInput}></textarea>
@@ -63,6 +66,7 @@ export const SubmitText = (props) => {
         Please try to keep posts appropriate. If you wouldn't share it with your workplace, don't share it here.
         Anything you post is subject to be deleted at any time.
       </p >
+      {/* Button to submit post */}
       <Link to={'/'}  onClick={(e) => {
           if(topicInput === '' || titleInput === '' ) {
             e.preventDefault()
