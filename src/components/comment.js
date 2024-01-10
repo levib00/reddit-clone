@@ -6,14 +6,13 @@ import { SubmitComment } from "./submit-comment";
 import { SignInModal } from "./sign-in-prompt";
 import RelativeTime from '@yaireo/relative-time'
 
-export const Comment = ({ comment, setIsExpandedThread, getComments, prev, level, setTopComments, setColPath, getUserName, signIn, updateDb, updateObj }) => {
+export const Comment = ({ comment, setIsExpandedThread, colPath, level, setTopComments, setColPath, getUserName, signIn, updateDb, updateObj, comments }) => {
   // Extracting postId from URL parameters
   const { postId } = useParams()
 
   // State variables
   const [thisComment, setThisComment] = useState({...comment})
   const [childComments, setChildComments] = useState()
-  const [prevParams, setPrevParams] = useState([...prev, comment.commentId, 'replies'])
   const [showReplyBox, setShowReplyBox] = useState(false)
   const [showEditBox, setShowEditBox] = useState(false)
   const [username] = useState(getUserName())
@@ -37,14 +36,11 @@ export const Comment = ({ comment, setIsExpandedThread, getComments, prev, level
       return
     }
     const childCommentSetter = async() => {
-      try {
-        setChildComments(await getComments(prevParams))        
-      } catch(error) {
-        console.error(error)
-      }
+      const childComments = comment.child
+      setChildComments(childComments)        
     }
     childCommentSetter()
-  }, [postId, setPrevParams, comment.commentId, prev, showReplyBox])
+  }, [postId, comment.commentId, colPath, showReplyBox])
 
   // Update the comment's upvote/downvote arrays and karma for rendering purposes
   const updateRender = (primaryVoteArrCopy, primaryArrName, secondaryVoteArrCopy, secondaryArrName, primaryIndex, secondaryIndex) => {
@@ -80,7 +76,7 @@ export const Comment = ({ comment, setIsExpandedThread, getComments, prev, level
   }
 
   const handleVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr) => {
-    const newParams = prevParams.slice(0, prevParams.length - 1)
+    const newParams = colPath.commentId
     updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, newParams)
   }
 
@@ -135,9 +131,9 @@ export const Comment = ({ comment, setIsExpandedThread, getComments, prev, level
           <div className="comment-data">
             <div className="comment-username">{thisComment.username}&nbsp;</div>
             <div className="comment-karma">{thisComment.karma} points</div>
-            <div  className="comment-date">&nbsp;{thisComment.timeStamp ? relativeTime.from(new Date(thisComment.timeStamp.seconds*1000)).toString()
+            <div  className="comment-date">&nbsp;{typeof thisComment.timeStamp.seconds === 'number' ? relativeTime.from(new Date(thisComment.timeStamp.seconds*1000)).toString()
               :
-              'date'}
+              'now'}
             </div>
           </div>
           {/* Display comment content */}
@@ -146,7 +142,7 @@ export const Comment = ({ comment, setIsExpandedThread, getComments, prev, level
             <div className="reply-button" onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
             {!thisComment.isDeleted && username.currentUser && username.currentUser.uid === comment.userId ?
             <div className="user-comment-actions">
-              {showDeletePrompt ? <div>are you sure? <div className='delete-button' onClick={() => handleRemove(prevParams)}>yes</div> / <div className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
+              {showDeletePrompt ? <div>are you sure? <div className='delete-button' onClick={() => handleRemove(colPath.commentId)}>yes</div> / <div className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
               <div className="edit-button" onClick={() => edit()}>edit</div>
             </div>
             :
@@ -156,15 +152,15 @@ export const Comment = ({ comment, setIsExpandedThread, getComments, prev, level
         </div>
       </div>
       {/* Edit comment form */}
-      {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
+      {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} parentId={comment.parentId} /> : null}
       {/* Reply comment form */}
-      {showReplyBox ? <SubmitComment showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={prevParams} /> : null}
+      {showReplyBox ? <SubmitComment comments={comments} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} dbPath={colPath} getUserName={getUserName} signIn={signIn} parentId={comment.commentId} /> : null}
       {/* Display child comments */}
-      {level < 10 ? (childComments && childComments.length > 0 ? childComments.map(comment => <Comment key={uuidv4()} setIsExpandedThread={setIsExpandedThread} getComments={getComments} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} prev={prevParams} />) : null)
+      {level < 10 ? ((childComments && childComments.length > 0) ? childComments.map(comment => <Comment key={uuidv4()} comments={comments} setIsExpandedThread={setIsExpandedThread} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} colPath={colPath} child={childComments}/>) : null)
       :
       <div className="continue-thread-button" onClick={() => {
         setIsExpandedThread(true)
-        getTopComments(prevParams)}
+        getTopComments(colPath)}
       }>load more comments</div>}
     </div>
   )
