@@ -76,7 +76,7 @@ export const Comment = ({ comment, setIsExpandedThread, colPath, level, setTopCo
   }
 
   const handleVote = async(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr) => {
-    const newParams = colPath.commentId
+    const newParams = colPath.concat([comment.commentId])
     updateVote(primaryArrName, primaryVoteArr, secondaryArrName, secondaryVoteArr, newParams)
   }
 
