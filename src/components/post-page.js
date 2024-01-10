@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { SubmitComment } from "./submit-comment";
 import { Comment } from "./comment";
 import { useParams } from "react-router-dom";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import {v4 as uuidv4} from 'uuid'
 import { SideBar } from "./sidebar";
 import { Post } from "./post";
@@ -17,7 +17,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   const [sortOption, setSortOption] = useState(sortingOptions[0])
   const [showDropDown, setShowDropDown] = useState(false)
   const [isExpandedThread, setIsExpandedThread] = useState(false)
-
+  // TODO: make sure that voting, deleting replying editing saving, sorting is fixed. also test sorting with now.
   // Set the topic to the posts corresponding topic
   useEffect(() => {
     if (post) {
@@ -33,7 +33,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   }, [setTopic])
 
   // Sort the comments based on the selected sorting option
-  const sortComments = (posts, sortOption) => {
+  const sortComments = (posts, sortOption) => { //TODO: fix
     posts.sort((a, b) => {
       if (b[sortOption] < a[sortOption]) {
         return -1;
@@ -83,7 +83,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
 
   // Gets top level comments from database (nested comments will be gotten in comment component)
   const getComments = async(colPath) => { 
-    const commentCollection = collection.apply(null, colPath)
+    const commentCollection = collection.apply(null, colPath);
     const commentSnapshot = await getDocs(commentCollection);
     const commentArr = [];
     commentSnapshot.docs.forEach(async doc => {
@@ -93,11 +93,32 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
     return commentArr
   }
 
+  const treeifyComments = async(colPath) => {
+    const comments = await getComments(colPath);
+    const commentsClone = [...comments];
+
+    for (const [key, commentI] of Object.entries(commentsClone)) {
+      if (!commentI.parentId) {
+        continue;
+      }
+      for (const [key, commentL] of Object.entries(commentsClone)) {
+        if (!commentL.child || commentL.child.constructor !== Array) {
+          commentL.child = [];
+        }
+        // console.log(commentI.parentId === commentL.commentId);
+        if (commentI.parentId === commentL.commentId) {
+          commentL.child.unshift(commentI);
+        }
+      }
+    }
+    return commentsClone;
+  }
+
   // Sets top level comments in state to be rendered
   useEffect(() => {
     const commentSetter = async(colPath) => {
       try {
-        const commentsClone = [...await getComments(colPath)]
+        const commentsClone = [...await treeifyComments(colPath)];
         setComments(sortComments(commentsClone, sortOption.option))
       } catch(error) {
         console.error(error)
@@ -108,9 +129,13 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
 
   const generateComments = (comments) => {
     if (comments && comments.length > 0) {
-      const array = comments.map(comment => 
-        <Comment key={uuidv4()} setIsExpandedThread={setIsExpandedThread} getComments={getComments} setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} prev={colPath}/>
-      )
+      const array = comments.map(comment => {
+        let newComment
+        if (!comment.parentId) {
+          newComment = <Comment key={uuidv4()} setIsExpandedThread={setIsExpandedThread} comments setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} colPath={colPath} child={comment.child}/>
+        }
+        return newComment
+      })
       return <>{array}</>
     }
     <div>There are no comments</div>
@@ -141,7 +166,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
             </div> 
           : null}
         </div>
-        <SubmitComment getUserName={getUserName} signInWithPopup={signIn} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} />
+        <SubmitComment getUserName={getUserName} signInWithPopup={signIn} dbPath={[db, 'posts', postId, 'comments']} postId={postId} db={db} comments={comments} setComments={setComments} parentId={null} />
         {isExpandedThread ? <div className="return-to-thread-button" onClick={() => {
           setIsExpandedThread(false);
           setColPath([db, 'posts', postId, 'comments'])
