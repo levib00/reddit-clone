@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
 
-export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, showReplyBox = null, comments, setComments, prevText = '', setThisComment, thisComment, isEdit = false}) => {
+export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, showReplyBox = null, comments, setComments, prevText = '', setThisComment, thisComment, isEdit = false, parentId}) => {
   // State to hold the comment input
   const [commentInput, setCommentInput] = useState(prevText)
   // State to control the display of the sign-in modal
@@ -21,7 +21,7 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
   }
 
   // Function to edit an existing comment
-  const editComment = async(username, commentPath, prevUserId) => {
+  const editComment = async(username, commentPath, prevUserId) => { // TODO: fix
     if (username !== null && username.uid === prevUserId) { 
       const newComment = commentInput
       try {
@@ -41,7 +41,7 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
   }
 
   // Function to handle the form submission
-  const handleSubmit = async () => {
+  const handleSubmit = async (parentId, comments) => {
     if (commentInput.length === '') {
       return
     }
@@ -60,7 +60,8 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
           commentId: commentId,
           upped: [],
           downed: [],
-          isDeleted: false
+          isDeleted: false,
+          parentId: parentId,
         }
         submitComment(newComment, commentId);
         setComments([...comments, newComment])
@@ -78,7 +79,7 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
       {/* Textarea for entering the comment */}
       <textarea className="comment-textbox" onChange={(e) => setCommentInput(e.target.value)} value={commentInput}></textarea>
       {/* Button to save the comment */}
-      <button className="submit-comment-button" onClick={handleSubmit}>save</button>
+      <button className="submit-comment-button" onClick={() =>handleSubmit(parentId, comments)}>save</button>
     </div>
   )
 }
