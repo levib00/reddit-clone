@@ -17,7 +17,6 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   const [sortOption, setSortOption] = useState(sortingOptions[0])
   const [showDropDown, setShowDropDown] = useState(false)
   const [isExpandedThread, setIsExpandedThread] = useState(false)
-  // TODO: make sure that voting, deleting replying editing saving, sorting is fixed. also test sorting with now.
   // Set the topic to the posts corresponding topic
   useEffect(() => {
     if (post) {
@@ -33,7 +32,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   }, [setTopic])
 
   // Sort the comments based on the selected sorting option
-  const sortComments = (posts, sortOption) => { //TODO: fix
+  const sortComments = (posts, sortOption) => {
     posts.sort((a, b) => {
       if (b[sortOption] < a[sortOption]) {
         return -1;
@@ -127,12 +126,12 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
     commentSetter(colPath)
   }, [db, postId, colPath])
 
-  const generateComments = (comments) => {
-    if (comments && comments.length > 0) {
-      const array = comments.map(comment => {
+  const generateComments = (commentTree) => {
+    if (commentTree && commentTree.length > 0) {
+      const array = commentTree.map(comment => {
         let newComment
         if (!comment.parentId) {
-          newComment = <Comment key={uuidv4()} setIsExpandedThread={setIsExpandedThread} comments setColPath={setColPath} setTopComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} colPath={colPath} child={comment.child}/>
+          newComment = <Comment key={uuidv4()} setIsExpandedThread={setIsExpandedThread} comments={comments} setColPath={setColPath} setComments={setComments} updateObj={updateObj} updateDb={updateDb} level={0} getUserName={getUserName} postId={postId} signInWithPopup={signIn} comment={comment} db={db} colPath={colPath} child={comment.child}/>
         }
         return newComment
       })
@@ -142,7 +141,6 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   }
 
   const mainArea = useMemo(() => post ? <Post key={uuidv4()} signIn={signIn} posts={posts} updateObj={updateObj} updateDb={updateDb} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} /> : <div>Loading</div>, [post]);
-  const commentsList = useMemo(() => generateComments(comments), [comments])
   
   return (
     <div className={"post-page"}>
@@ -172,7 +170,7 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
           setColPath([db, 'posts', postId, 'comments'])
         }}>return to thread	<div className="return-indicator">→</div></div> : null}
           {/* Render comments */}
-          {commentsList}
+          {generateComments(comments)}
       </div>
     </div>
   )
