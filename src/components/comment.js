@@ -6,13 +6,12 @@ import { SubmitComment } from "./submit-comment";
 import { SignInModal } from "./sign-in-prompt";
 import RelativeTime from '@yaireo/relative-time'
 
-export const Comment = ({ comment, setIsExpandedThread, colPath, level, setTopComments, setColPath, getUserName, signIn, updateDb, updateObj, comments }) => {
+export const Comment = ({ comment, setIsExpandedThread, colPath, level, setComments, setColPath, getUserName, signIn, updateDb, updateObj, comments }) => {
   // Extracting postId from URL parameters
-  const { postId } = useParams()
 
   // State variables
   const [thisComment, setThisComment] = useState({...comment})
-  const [childComments, setChildComments] = useState()
+  const [childComments, setChildComments] = useState(comment.child || [])
   const [showReplyBox, setShowReplyBox] = useState(false)
   const [showEditBox, setShowEditBox] = useState(false)
   const [username] = useState(getUserName())
@@ -29,18 +28,6 @@ export const Comment = ({ comment, setIsExpandedThread, colPath, level, setTopCo
       setIsDowned(thisComment.downed ? thisComment.downed.includes(username.currentUser.uid) : false)
     }
   }, [thisComment, username.currentUser])
-
-  // Fetch child comments when the postId, commentId, prev, or showReplyBox changes
-  useEffect(() => {
-    if (!comment.commentId) {
-      return
-    }
-    const childCommentSetter = async() => {
-      const childComments = comment.child
-      setChildComments(childComments)        
-    }
-    childCommentSetter()
-  }, [postId, comment.commentId, colPath, showReplyBox])
 
   // Update the comment's upvote/downvote arrays and karma for rendering purposes
   const updateRender = (primaryVoteArrCopy, primaryArrName, secondaryVoteArrCopy, secondaryArrName, primaryIndex, secondaryIndex) => {
@@ -83,7 +70,7 @@ export const Comment = ({ comment, setIsExpandedThread, colPath, level, setTopCo
   // Remove the comment from the database
   const remove = async(postPath) => {
     try {
-      const postUpdate = await doc.apply(null, postPath.slice(0, postPath.length - 1))
+      const postUpdate = await doc.apply(null, postPath)
       await updateDoc(postUpdate, {
       content: '[deleted]',
       username: '[deleted]',
@@ -131,7 +118,7 @@ export const Comment = ({ comment, setIsExpandedThread, colPath, level, setTopCo
           <div className="comment-data">
             <div className="comment-username">{thisComment.username}&nbsp;</div>
             <div className="comment-karma">{thisComment.karma} points</div>
-            <div  className="comment-date">&nbsp;{typeof thisComment.timeStamp.seconds === 'number' ? relativeTime.from(new Date(thisComment.timeStamp.seconds*1000)).toString()
+            <div  className="comment-date">&nbsp;{thisComment.timeStamp && (typeof thisComment.timeStamp.seconds === 'number') ? relativeTime.from(new Date(thisComment.timeStamp.seconds*1000)).toString()
               :
               'now'}
             </div>
@@ -142,7 +129,7 @@ export const Comment = ({ comment, setIsExpandedThread, colPath, level, setTopCo
             <div className="reply-button" onClick={() => setShowReplyBox(!showReplyBox)}>reply</div>
             {!thisComment.isDeleted && username.currentUser && username.currentUser.uid === comment.userId ?
             <div className="user-comment-actions">
-              {showDeletePrompt ? <div>are you sure? <div className='delete-button' onClick={() => handleRemove(colPath.commentId)}>yes</div> / <div className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</div></div> : <div className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</div>}
+              {showDeletePrompt ? <div>are you sure? <span className='delete-button' onClick={() => handleRemove(colPath.concat([comment.commentId]))}>yes</span> / <span className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>no</span></div> : <span className='delete-button' onClick={() => setShowDeletePrompt(!showDeletePrompt)}>delete</span>}
               <div className="edit-button" onClick={() => edit()}>edit</div>
             </div>
             :
@@ -152,11 +139,11 @@ export const Comment = ({ comment, setIsExpandedThread, colPath, level, setTopCo
         </div>
       </div>
       {/* Edit comment form */}
-      {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} parentId={comment.parentId} /> : null}
+      {showEditBox ? <SubmitComment thisComment={thisComment} setThisComment={setThisComment} isEdit={true} prevText={thisComment.content} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} getUserName={getUserName} signIn={signIn} dbPath={colPath} parentId={comment.parentId} /> : null}
       {/* Reply comment form */}
-      {showReplyBox ? <SubmitComment comments={comments} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} dbPath={colPath} getUserName={getUserName} signIn={signIn} parentId={comment.commentId} /> : null}
+      {showReplyBox ? <SubmitComment childComments={childComments} setChildComments={setChildComments} comments={comments} setComments={setComments} parentComment={comment} showReplyBox={showReplyBox} setShowReplyBox={setShowReplyBox} dbPath={colPath} getUserName={getUserName} signIn={signIn} parentId={comment.commentId} /> : null}
       {/* Display child comments */}
-      {level < 10 ? ((childComments && childComments.length > 0) ? childComments.map(comment => <Comment key={uuidv4()} comments={comments} setIsExpandedThread={setIsExpandedThread} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} setColPath={setColPath} setTopComments={setTopComments} level={level + 1} comment={comment} colPath={colPath} child={childComments}/>) : null)
+      {level < 10 ? ((childComments && childComments.length > 0) ? childComments.map(comment => <Comment key={uuidv4()} comments={comments} setIsExpandedThread={setIsExpandedThread} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} setColPath={setColPath} setComments={setComments} level={level + 1} comment={comment} colPath={colPath} child={childComments}/>) : null)
       :
       <div className="continue-thread-button" onClick={() => {
         setIsExpandedThread(true)
