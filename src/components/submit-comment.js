@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
 
-export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, showReplyBox = null, comments, setComments, prevText = '', setThisComment, thisComment, isEdit = false, parentId}) => {
+export const SubmitComment = ({setChildComments, childComments, getUserName, dbPath, signIn, setShowReplyBox, showReplyBox = null,  comments, setComments, prevText = '', setThisComment, thisComment, isEdit = false, parentId}) => {
   // State to hold the comment input
   const [commentInput, setCommentInput] = useState(prevText)
   // State to control the display of the sign-in modal
@@ -21,11 +21,11 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
   }
 
   // Function to edit an existing comment
-  const editComment = async(username, commentPath, prevUserId) => { // TODO: fix
+  const editComment = async(username, commentPath, prevUserId) => {
     if (username !== null && username.uid === prevUserId) { 
       const newComment = commentInput
       try {
-        await updateDoc(commentPath, {
+        await updateDoc(doc.apply(null, commentPath), {
           content: newComment
         })
       } catch (error) {
@@ -49,7 +49,7 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
     let username = getUserName().currentUser
     if (username !== null) {
       if (isEdit) {
-        editComment(username, dbPath, thisComment.userId)
+        editComment(username, dbPath.concat(thisComment.commentId), thisComment.userId)
       } else {
         let newComment = {
           content: commentInput,
@@ -64,7 +64,11 @@ export const SubmitComment = ({getUserName, dbPath, signIn, setShowReplyBox, sho
           parentId: parentId,
         }
         submitComment(newComment, commentId);
-        setComments([...comments, newComment])
+        if (!parentId) {
+          setComments([newComment, ...comments])
+        } else {
+          setChildComments([...childComments, newComment])
+        }
       } 
       clearBox();
     } else {
