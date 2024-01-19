@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import React, { useState } from 'react';
+import React from 'react';
 import { Comment } from '../components/comment';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
@@ -68,7 +68,7 @@ describe("Test comments render properly.", () => {
     comment.upped = generatePosts(34)
     render(
       <MemoryRouter>
-        <Comment key={Math.random()} level={0} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} postId={null} signInWithPopup={null} comment={comment} db={null} prev={[null, 'posts', null, 'comments']}/>
+        <Comment key={Math.random()} level={0} getUserName={getUserName} updateObj={updateObj} updateDb={updateDb} postId={null} signInWithPopup={null} comment={comment} db={null} colPath={[null, 'posts', null, 'comments']}/>
       </MemoryRouter>
     );
 
@@ -89,7 +89,7 @@ describe("Test comments render properly.", () => {
   test('Pressing delete removes content and user', () => {
     render(
       <MemoryRouter>
-        <Comment key={Math.random()} level={0} getUserName={getUserName} postId={null} signInWithPopup={null} comment={comment} db={null} prev={[null, 'posts', null, 'comments']}/>
+        <Comment key={Math.random()} level={0} getUserName={getUserName} postId={null} signInWithPopup={null} comment={comment} db={null} colPath={[null, 'posts', null, 'comments']}/>
       </MemoryRouter>
     );
 
@@ -106,7 +106,7 @@ describe("Test comments render properly.", () => {
   test('Editing comments works', () => {
     render(
       <MemoryRouter>
-        <Comment key={Math.random()} level={0} getUserName={getUserName} postId={null} signInWithPopup={null} comment={comment} db={null} prev={[null, 'posts', null, 'comments']}/>
+        <Comment key={Math.random()} level={0} getUserName={getUserName} postId={null} signInWithPopup={null} comment={comment} db={null} colPath={[null, 'posts', null, 'comments']}/>
       </MemoryRouter>
     );
 
