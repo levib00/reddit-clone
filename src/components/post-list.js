@@ -17,6 +17,7 @@ export const PostList = (props) => {
   const [username] = useState(getUserName())
   const [sortOption, setSortOption] = useState('timeStamp')
   const [start, setStart] = useState(0);
+  const [openSidebar, setOpenSidebar] = useState(false);
 
   // Function to sort posts based on a given sort option
   const sortPosts = (posts, sortOption) => {
@@ -38,6 +39,13 @@ export const PostList = (props) => {
       setPosts(sortPosts(sortedPosts, sortOption))
     }
   }, [props.posts, sortOption])
+
+  const handleSortButton = (sortOption) => {
+    if (openSidebar) {
+      setOpenSidebar(false)
+    }
+    setSortOption(sortOption)
+  }
   
   // Set the topic extracted above
   useEffect(() => { 
@@ -79,17 +87,23 @@ export const PostList = (props) => {
   
   return (
     <div className="post-list-page">
-      <SideBar topic={topic}/>
-      <div className="post-list">
+      <SideBar topic={topic} mobile={false} />
+      {openSidebar && <SideBar topic={topic} mobile={true} />}
+       <div className="post-list">
         {/* Sorting options */}
         <div className="sort-post-list">
-          <button className={sortOption === 'timeStamp' ? "sort-button selected-sort" : 'sort-button'} onClick={() => setSortOption('timeStamp')}>new</button>
-          <button className={sortOption === 'karma' ? "sort-button selected-sort" : 'sort-button'} onClick={() => setSortOption('karma')}>top</button>
+          <button className={!openSidebar && sortOption === 'timeStamp' ? "sort-button selected-sort" : 'sort-button'} onClick={() => handleSortButton('timeStamp')}>new</button>
+          <button className={!openSidebar && sortOption === 'karma' ? "sort-button selected-sort" : 'sort-button'} onClick={() =>handleSortButton('karma')}>top</button>
+          <button className={openSidebar ? "open-sidebar sort-button selected-sort " : 'open-sidebar sort-button'} onClick={() => setOpenSidebar(!openSidebar)}>sidebar</button>
         </div>
         {/* Render posts */}
-        {posts ? posts.slice(start, numberOfPosts).map((post, index) => React.isValidElement(post) ? post : <Post key={uuidv4()} index={index} posts={posts} setPosts={setPosts} db={db} username={username} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
-        {posts.length > numberOfPosts ? <Footer extend={extend} loadNext={loadNext}/> : null}
-      </div>
+        {!openSidebar &&
+        <>
+          {posts ? posts.slice(start, numberOfPosts).map((post, index) => React.isValidElement(post) ? post : <Post key={uuidv4()} index={index} posts={posts} setPosts={setPosts} db={db} username={username} updateObj={updateObj} updateDb={updateDb} signIn={signIn} getUserName={getUserName} post={post} from={'post-list'} />) : null}
+          {posts.length > numberOfPosts ? <Footer extend={extend} loadNext={loadNext}/> : null}
+        </>
+        }
+        </div>
     </div>
   )
 }
