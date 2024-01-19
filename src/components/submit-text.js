@@ -3,7 +3,7 @@ import { SubmitPage } from "./submission-page";
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid'
 import { SignInModal } from "./sign-in-prompt";
-import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 export const SubmitText = (props) => {
   const {db, getUserName, signIn} = props
@@ -13,6 +13,7 @@ export const SubmitText = (props) => {
   const [textInput, setTextInput] = useState('')
   const [topicInput, setTopicInput] = useState('')
   const [showSignIn, setShowSignIn] = useState(false)
+  const navigate = useNavigate()
 
   // Function to submit the posts to the database
   const submitPosts = async() => {
@@ -43,6 +44,14 @@ export const SubmitText = (props) => {
     }
   }
 
+  const handleSubmitButton = () => {
+    if(topicInput === '' || titleInput === '' ) {
+      return
+    }
+    submitPosts()
+    navigate('/reddit-clone/')
+  }
+
   return (
     <div className="post-submit">
        {/* Render the sign-in modal if user tries to do an action that requires them to be signed in */}
@@ -67,16 +76,9 @@ export const SubmitText = (props) => {
         Anything you post is subject to be deleted at any time.
       </p >
       {/* Button to submit post */}
-      <Link to={'/reddit-clone/'}  onClick={(e) => {
-          if(topicInput === '' || titleInput === '' ) {
-            e.preventDefault()
-          }
-          submitPosts()
-        }}>
-        <button className="submit-post-button" >
-          Submit
-        </button>
-      </Link>
+      <button className="submit-post-button" onClick={handleSubmitButton}>
+        Submit
+      </button>
       <div className="credit-links">
         <a href="https://www.flaticon.com/free-icons/photography" title="photography icons">Camera icon created by Freepik - Flaticon</a>
         <a href="https://www.flaticon.com/free-icons/cloud-computing" title="cloud computing icons">Cloud icon created by Smartline - Flaticon</a>
