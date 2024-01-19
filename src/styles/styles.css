@@ -2,6 +2,9 @@
 :root {
   --header-text: #8cb3d9;
 }
+.body, html, #root {
+  height: 100%;
+}
 .App {
   background-color: #262626;
   color: #dddddd;
@@ -214,7 +217,9 @@ a {
   top: 21px;
   left: 150px;
   gap: 2px;
-
+}
+.post-list {
+  overflow-y: auto;
 }
 .sort-button {
   border: none;
@@ -271,6 +276,7 @@ a {
 .comments-section {
   grid-column-start: 1;
   padding-left: 15px;
+  margin-bottom: 15px;
 }
 .comment-buttons {
   display: flex;
@@ -289,6 +295,10 @@ a {
   border: #333333 1px solid;
   border-radius: 5px;
   padding: 7px 10px 15px 2px;
+  word-break: break-word;
+}
+.comment-text {
+  word-wrap: break-word;
 }
 .comment-text {
   margin-top: 6px;
@@ -517,14 +527,19 @@ button {
   cursor: pointer;
   font-size: 1rem;
 }
+.center-sign-in-prompt {
+  position: absolute; 
+  left: 50%;
+  top: 50%;
+}
 .sign-in-prompt {
-  position: absolute;
-  --prompt-width: 600px;
-  --prompt-height: 200px;
-  top: calc(50% - (var(--prompt-height) / 2));
-  left: calc(50% - (var(--prompt-width) / 2));
-  width: var(--prompt-width);
-  height: var(--prompt-height);
+  top: 25%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  position: fixed; 
+  border: dotted red 1px;
+  width: 600px;
+  height: 200px;
   background-color: #333333;
   display: flex;
   justify-content: center;
@@ -534,6 +549,7 @@ button {
   box-shadow: #000000 0px 0px 4px 1px;
   border: #4d4d4d 1px solid;
   z-index: 21;
+  transform: translate(-50%, 0);
 }
 .prompt-button-container {
   display: flex;
@@ -567,10 +583,189 @@ button {
   background-color: #707070;
 }
 .prevent-click-for-prompt {
+  overflow-x: hidden;
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   width: 100%;
   z-index: 19;
+}
+.align-left-post-column {
+  display: flex;
+  align-items: center;
+  margin-bottom: auto;
+}
+.open-sidebar {
+  display: none;
+}
+@media (max-width: 1050px) {
+  .App {
+    overflow-y: unset;
+  }
+  .open-sidebar {
+    display: block;
+  }
+  .post:nth-child(n+3) {
+    border-top: white 1px solid;
+    margin: 0;
+  }
+  .nav {
+    height: 45px;
+  }
+  .sort-post-list {
+    position: absolute;
+    top: 26px;
+  }
+  .post-index {
+    display: none !important;
+  }
+  .post-page .post {
+    border-top: none;
+  }
+  .full-sidebar {
+    display: none;
+  }
+  .mobile-sidebar {
+    grid-column-start: 1 !important;
+  }
+  .thumbnail {
+    width: 65px;
+    height: 65px !important;
+    margin-left: 8px;
+    background-size: 5.5rem;
+    background-position: top 524px left -10px !important;
+  }
+  .default-text {
+    background-position: -9px -1267px;
+  }
+  .post-text {
+    width: 90%;
+  }
+  .comment-textbox {
+    width: 90%;
+  }
+  .post-submit {
+    width: 100%;
+  }
+  .comments-section {
+    padding-right: 15px;
+  }
+  .post-page {
+    display: flex;
+    flex-direction: column;
+  }
+  .comment-voting-booth {
+    margin: 0 15px 0 10px;
+  }
+  .main-post-image {
+    width: 90%;
+    height: auto;
+  }
+  .post {
+    
+    height: max-content !important;
+    align-items: center;
+    padding: 8px 8px !important;
+  }
+  .arrow {
+    height: 38px;
+    width: 38px;
+    background-size: 7.2rem;
+  }
+  .upvote {
+    background-position: top 3px right -38px !important ;
+  }
+  .downvote {
+    background-position: bottom 3px right -38px !important ;
+  }
+  .voting-booth {
+    height: unset;
+    margin-top: 0 !important;
+  }
+  .post-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .post-info > div, .title {
+    margin-right: 5px;
+  }
+  .post-list-page {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+
+  }
+  .voting-booth {
+    margin-top: 3px;
+  }
+  .post-top > .title {
+    font-size: 1rem;
+  }
+  .post-submit {
+    margin: 0;
+  }
+  .expand-collapse {
+    width: 30px !important;
+  }
+  .post-top {
+    width: 100%;
+  }
+  .post-actions > div > a {
+    white-space: nowrap;
+  }
+  .post-actions, .comment-actions {
+    font-size: 1rem;
+  }
+  .post-info, .comment-username, .comment-karma, .comment-data {
+    font-size: 0.8rem;
+  }
+  .title {
+    font-size: 1.3rem;
+  }
+  .sign-in-prompt {
+    width: 90vw;
+  }
+  .comment-text {
+    font-size: 1.1rem;
+  }
+  .submit-page {
+    width: 95%;
+    margin-bottom: 5px;
+  }
+  .form-field {
+    width: 90%;
+  }
+  .submit-blurb {
+    width: 90%;
+  }
+  .submit-blurb, .post-submit a{
+    margin-left: 5px;
+  }
+  .submit-post-button, .submit-comment-button {
+    width: 100px;
+    height: 48px;
+  }
+}
+@media (max-width: 500px) {
+  .post-actions {
+    font-size: 15px;
+    margin-left: -30px;
+  }
+}
+
+@media (max-width: 770px) {
+  .top-comment {
+    border-right: #333333 1px solid;
+  }
+  .nested-comment {
+    margin-left: 1px;
+  }
+  .comment {
+    padding-right: 0 !important;
+    border-right: 0px;
+  }
+  .comment-text {
+    margin-right: 8px;
+  }
 }
