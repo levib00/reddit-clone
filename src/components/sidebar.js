@@ -1,12 +1,12 @@
 import react, { useState } from "react";
 import { Link } from "react-router-dom";
 
-export const SideBar = ({ topic }) => {
+export const SideBar = ({ topic, mobile }) => {
   // State to hold the search query
   const [ searchQuery, setSearchQuery ] = useState('')
 
   return (
-    <div className="sidebar">
+    <div className={mobile ? 'sidebar mobile-sidebar' : 'sidebar full-sidebar'}>
       {/* Input field for the search query */}
       <input className="search-bar" type="text" placeholder="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}/>
       {/* Link to perform the search using the search query */}
