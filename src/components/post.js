@@ -178,19 +178,21 @@ export const Post = ({post, db, getUserName, signIn, from, updateDb, updateObj, 
   return (
   <div className={ isImage ? expanded ? "post expanded" : "post" : expanded ? "post text-post expanded" : "post text-post" }>
     {/* Render sign in prompt that shows when users tries an action that requires them to be signed in */}
-    {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a comment'} getUserName={getUserName} /> : null}
+    {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'vote on a post'} getUserName={getUserName} /> : null}
     {/* Render upvote/downvote buttons and karma */}
-    <div className="post-index">{index}</div>
-    <div className="voting-booth">
-      <button aria-label="upvote button" className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}></button>
-      <div className="karma">{thisPost.karma}</div>
-      <button aria-label="downvote button" className={isDowned ? 'arrow downvote downvoted' : 'arrow downvote not-downvoted'} onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}></button>
+    <div className="align-left-post-column">
+      <div className="post-index">{index}</div>
+      <div className="voting-booth">
+        <button aria-label="upvote button" className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisPost.upped,'downed', thisPost.downed)}></button>
+        <div className="karma">{thisPost.karma}</div>
+        <button aria-label="downvote button" className={isDowned ? 'arrow downvote downvoted' : 'arrow downvote not-downvoted'} onClick={() => handleVote('downed', thisPost.downed, 'upped', thisPost.upped)}></button>
+      </div>
+      {/* Render image if the post has one to render */}
+      <Link to={`/reddit-clone/post/${id}`} >{ isImage ? <img className="thumbnail" src={img} alt={`${title}`}/> : <div className="thumbnail default-text"></div>}</Link>
     </div>
-    {/* Render image if the post has one to render */}
-    { isImage ? <img className="thumbnail" src={img} alt={`${title}`}/> : <div className="thumbnail default-text"></div>}
     <div className="post-top">
       {/* Render title and topic */}
-      <div className="title">{thisPost.title}</div>
+      <Link to={`/reddit-clone/post/${id}`} ><div className="title">{thisPost.title}</div></Link>
       <div className="post-overview"> {/* Maybe move background image of below button into css backgrounds */}
         {/* Expand/Collapse button to show more or less of the posts content */}
         {(from === 'post-list' || isImage) && (isImage === true || hasText) ?
