@@ -107,7 +107,7 @@ export const Comment = ({ comment, setIsExpandedThread, colPath, level, setComme
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from={'submit a comment'} getUserName={getUserName} /> : null}
       {/* TODO: add button to collapse/expand comment chains. */}
       <div className="comment-overview"> 
-        <div className="voting-booth">
+        <div className="voting-booth comment-voting-booth">
         {/* Button for upvoting */}
           <button aria-label="upvote button" className={isUpped ? 'arrow upvote upvoted' : 'arrow upvote not-upvoted'} onClick={() => handleVote('upped', thisComment.upped, 'downed', thisComment.downed )}></button>
           {/* Button for downvoting */}
