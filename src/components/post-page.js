@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { SubmitComment } from "./submit-comment";
 import { Comment } from "./comment";
 import { useParams } from "react-router-dom";
-import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import {v4 as uuidv4} from 'uuid'
 import { SideBar } from "./sidebar";
 import { Post } from "./post";
@@ -17,6 +17,8 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   const [sortOption, setSortOption] = useState(sortingOptions[0])
   const [showDropDown, setShowDropDown] = useState(false)
   const [isExpandedThread, setIsExpandedThread] = useState(false)
+  const [openSidebar, setOpenSidebar] = useState(false);
+
   // Set the topic to the posts corresponding topic
   useEffect(() => {
     if (post) {
@@ -141,12 +143,16 @@ export const PostPage = ({ db, getUserName, signIn, setTopic, posts, updateDb, u
   }
 
   const mainArea = useMemo(() => post ? <Post key={uuidv4()} signIn={signIn} posts={posts} updateObj={updateObj} updateDb={updateDb} setPosts={setPost} db={db} getUserName={getUserName} post={post} from={'post-page'} /> : <div>Loading</div>, [post]);
-  
+
   return (
     <div className={"post-page"}>
-      {post ?
+      <div className="sort-post-list">
+          <button className={openSidebar ? "open-sidebar sort-button selected-sort " : 'open-sidebar sort-button'} onClick={() => setOpenSidebar(!openSidebar)}>sidebar</button>
+        </div>
+      {post  ?
         <>
           <SideBar topic={post.topic} />
+          {openSidebar && <SideBar topic={post.topic} mobile={true} />}
           {mainArea}
         </>
         : null
