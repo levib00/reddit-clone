@@ -1,19 +1,20 @@
-import React from "react";
+import React from 'react';
 
-export const Footer = (props) => {
-  const { extend, loadNext } = props
+export default function Footer(props) {
+  const { extend, loadNext } = props;
 
   return (
+    // eslint-disable-next-line react/jsx-filename-extension
     <div className="footer">
       <div>
         {/* "Load more posts" button */}
         <button className="footer-button" onClick={extend}>load more posts</button>
       </div>
-      or 
+      or
       <div>
         {/* "Load the next page" button */}
         <button className="footer-button" onClick={loadNext}>load the next page</button>
-      </div> 
+      </div>
     </div>
-  )
+  );
 }
