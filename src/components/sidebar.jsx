@@ -6,7 +6,6 @@ export default function SideBar({ topic, mobile }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className={mobile ? 'sidebar mobile-sidebar' : 'sidebar full-sidebar'}>
       {/* Input field for the search query */}
       <input className="search-bar" type="text" placeholder="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />

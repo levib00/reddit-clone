@@ -11,7 +11,6 @@ export default function NavBar(props) {
   const [username, setUserName] = useState(getUserName());
 
   return (
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className="nav">
       <div className="hero">
         {/* Link to the homepage and logo */}

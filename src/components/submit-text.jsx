@@ -53,7 +53,6 @@ export default function SubmitText(props) {
   };
 
   return (
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className="post-submit">
       {/* Render the sign-in modal if user tries to do an action that requires them to be
       signed in */}

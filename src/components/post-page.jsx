@@ -139,7 +139,6 @@ export default function PostPage({
         let newComment;
         if (!comment.parentId) {
           newComment = (
-            // eslint-disable-next-line react/jsx-filename-extension
             <Comment
               key={uuidv4()}
               setIsExpandedThread={setIsExpandedThread}

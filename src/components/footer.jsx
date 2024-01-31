@@ -4,7 +4,6 @@ export default function Footer(props) {
   const { extend, loadNext } = props;
 
   return (
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className="footer">
       <div>
         {/* "Load more posts" button */}

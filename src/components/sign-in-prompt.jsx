@@ -4,7 +4,6 @@ import React from 'react';
 
 export default function SignInModal({ from, signIn, setShowSignIn }) {
   return (
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className="prevent-click-for-prompt" onClick={() => setShowSignIn(false)}>
       <div className="sign-in-prompt" onClick={(e) => e.stopPropagation()}>
         {/* message changes based on what action the user was trying to do. */}

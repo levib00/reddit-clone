@@ -76,7 +76,6 @@ export default function PostList(props) {
       newPosts.splice(
         i * 25,
         0,
-        // eslint-disable-next-line react/jsx-filename-extension
         <div key={uuidv4()}>
           Page
           {i}

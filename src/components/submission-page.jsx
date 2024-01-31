@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 
 export default function SubmitPage({ from }) {
   return (
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className="submit-page">
       {/* change what kind of post user wants to submit */}
       <div className="post-type-selector-container">

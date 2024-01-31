@@ -81,7 +81,6 @@ export default function SubmitComment({
   };
 
   return (
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className="submit-comment">
       {/* Render the sign-in modal if showSignIn is true */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from="submit a comment" getUserName={getUserName} /> : null}

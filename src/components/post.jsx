@@ -222,7 +222,6 @@ export default function Post({
   };
 
   return (
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className={isImage ? `post${expanded ? ' expanded' : ''}` : `post text-post${expanded ? ' expanded' : ''}`}>
       {/* Render sign in prompt that shows when users
       tries an action that requires them to be signed in */}

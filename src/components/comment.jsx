@@ -164,7 +164,6 @@ export default function Comment({
 
   return (
     // TODO: test classname
-    // eslint-disable-next-line react/jsx-filename-extension
     <div className={`${level === 0 ? 'top-comment comment' : 'comment'} ${level % 2 ? 'nested-comment even' : 'nested-comment odd'}`}>
       {/* Modal for signing in if user is not logged in
        but tries an action that requires authentication */}
