@@ -57,7 +57,7 @@ export default function PostList(props) {
       setTopic('all');
     }
   }, [topic, setTopic]);
-
+  // console.log(topic);
   // Reset the topic when the component is unmounted
   useEffect(() => () => {
     setTopic('all');
@@ -66,6 +66,7 @@ export default function PostList(props) {
   // Fetch posts based on the topic, user ID, and search query
   useEffect(() => {
     postSetter(topic, uid, searchQuery);
+    // console.log(topic, !!searchQuery);
   }, [topic, uid, searchQuery]);
 
   // Function to extend the number of posts displayed

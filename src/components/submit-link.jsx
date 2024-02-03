@@ -7,6 +7,8 @@ import SignInModal from './sign-in-prompt';
 import camera from '../assets/camera.png';
 import cloud from '../assets/cloud.png';
 
+const test = 'test';
+
 export default function SubmitLink(props) {
   const { db, getUserName, signIn } = props;
 
@@ -93,20 +95,20 @@ export default function SubmitLink(props) {
           }}
         />
       </div>
-      <div className="form-field">
-        <label htmlFor="title-textbox" className="title-label">
+      <label htmlFor={test} className="title-label form-field">
+        <div>
           <span className="required-marker">*</span>
           title
-          <textarea id="title-textbox" className="title-textbox" required maxLength={300} onChange={(e) => { setTitleInput(e.target.value); }} value={titleInput} />
-        </label>
-      </div>
-      <div className="form-field">
-        <label htmlFor="topic" className="topic-label">
+        </div>
+        <textarea id={test} className="title-textbox" required maxLength={300} onChange={(e) => { setTitleInput(e.target.value); }} value={titleInput} />
+      </label>
+      <label htmlFor="topic" className="topic-label form-field">
+        <div>
           <span className="required-marker">*</span>
           topic
-          <input id="topic" className="topic-textbox" required type="text" onChange={(e) => { setTopicInput(e.target.value); }} value={topicInput} />
-        </label>
-      </div>
+        </div>
+        <input id="topic" className="topic-textbox" required type="text" onChange={(e) => { setTopicInput(e.target.value); }} value={topicInput} />
+      </label>
       <p className="submit-blurb">
         Please try to keep posts appropriate. If you wouldn&apos;t share it with your workplace,
         don&apos;t share it here.

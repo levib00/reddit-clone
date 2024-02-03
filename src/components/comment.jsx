@@ -163,8 +163,7 @@ export default function Comment({
   };
 
   return (
-    // TODO: test classname
-    <div className={`${level === 0 ? 'top-comment comment' : 'comment'} ${level % 2 ? 'nested-comment even' : 'nested-comment odd'}`}>
+    <div className={`${level === 0 ? 'top-comment comment' : 'comment'} ${level !== 0 && (level % 2 ? 'nested-comment even' : 'nested-comment odd')}`}>
       {/* Modal for signing in if user is not logged in
        but tries an action that requires authentication */}
       {showSignIn ? <SignInModal setShowSignIn={setShowSignIn} signIn={signIn} from="submit a comment" getUserName={getUserName} /> : null}

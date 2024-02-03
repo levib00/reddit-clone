@@ -60,26 +60,24 @@ export default function SubmitText(props) {
       <SubmitPage from="text" />
       {/* form for user to fill in content */}
       <span className="required-marker">* required</span>
-      <div className="form-field">
-        <label htmlFor="title" className="title-label">
+      <label htmlFor="title" className="title-label form-field">
+        <div>
           <span className="required-marker">*</span>
           title
-          <textarea id="title" className="title-textbox" onChange={(e) => { setTitleInput(e.target.value); }} value={titleInput} />
-        </label>
-      </div>
-      <div className="form-field">
-        <label htmlFor="post-text" className="text-label">
-          text
-          <textarea id="post-text" className="text-textbox" onChange={(e) => { setTextInput(e.target.value); }} value={textInput} />
-        </label>
-      </div>
-      <div className="form-field">
-        <label htmlFor="topic-input" className="topic-label">
+        </div>
+        <textarea id="title" className="title-textbox" onChange={(e) => { setTitleInput(e.target.value); }} value={titleInput} />
+      </label>
+      <label htmlFor="post-text" className="text-label form-field">
+        text
+        <textarea id="post-text" className="text-textbox" onChange={(e) => { setTextInput(e.target.value); }} value={textInput} />
+      </label>
+      <label htmlFor="topic-input" className="topic-label form-field">
+        <div>
           <span className="required-marker">*</span>
           topic
-          <input id="topic-input" className="topic-textbox" type="text" onChange={(e) => { setTopicInput(e.target.value); }} value={topicInput} />
-        </label>
-      </div>
+        </div>
+        <input id="topic-input" className="topic-textbox" type="text" onChange={(e) => { setTopicInput(e.target.value); }} value={topicInput} />
+      </label>
       <p className="submit-blurb">
         Please try to keep posts appropriate. If you wouldn&apos;t share it with your workplace,
         don&apos;t share it here.

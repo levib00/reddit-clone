@@ -4,8 +4,8 @@ import React from 'react';
 
 export default function SignInModal({ from, signIn, setShowSignIn }) {
   return (
-    <div className="prevent-click-for-prompt" onClick={() => setShowSignIn(false)}>
-      <div className="sign-in-prompt" onClick={(e) => e.stopPropagation()}>
+    <div className="prevent-click-for-prompt">
+      <div className="sign-in-prompt">
         {/* message changes based on what action the user was trying to do. */}
         <div className="sign-in-text">
           Sign in to

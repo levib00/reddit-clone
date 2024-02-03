@@ -67,8 +67,9 @@ function App() {
   });
 
   const [posts, setPosts] = useState(null);
-
+  // console.log(currentTopic);
   const getPosts = async (uid, searchQuery = null, topic = 'all') => {
+    console.log(uid, searchQuery, topic);
     // Gets posts under different circumstances (defaults to all if no topic is selected).
     const postArr = [];
 
@@ -117,7 +118,7 @@ function App() {
 
   const postSetter = async (topic, uid, searchQuery = null) => {
     try {
-      setPosts(await getPosts(topic, uid, searchQuery));
+      setPosts(await getPosts(uid, searchQuery, topic));
     } catch (error) {
       console.error(error);
     }

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import {
@@ -100,20 +101,15 @@ export default function PostPage({
     const untreedComments = await getComments(collectionPath);
     const commentsClone = [...untreedComments];
 
-    // eslint-disable-next-line no-restricted-syntax, no-unused-vars
-    for (const [key, commentI] of Object.entries(commentsClone)) {
-      if (!commentI.parentId) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-      // eslint-disable-next-line no-restricted-syntax, no-shadow, no-unused-vars
-      for (const [key, commentL] of Object.entries(commentsClone)) {
-        if (!commentL.child || commentL.child.constructor !== Array) {
-          commentL.child = [];
-        }
-        // console.log(commentI.parentId === commentL.commentId);
-        if (commentI.parentId === commentL.commentId) {
-          commentL.child.unshift(commentI);
+    for (let i = 0; i < commentsClone.length; i += 1) {
+      if (commentsClone[i].parentId) {
+        for (let j = 0; j < commentsClone.length; j += 1) {
+          if (!commentsClone[j].child || commentsClone[j].child.constructor !== Array) {
+            commentsClone[j].child = [];
+          }
+          if (commentsClone[i].parentId === commentsClone[j].commentId) {
+            commentsClone[j].child.unshift(commentsClone[i]);
+          }
         }
       }
     }
@@ -160,9 +156,7 @@ export default function PostPage({
         }
         return newComment;
       });
-      return (
-        { array }
-      );
+      return array;
     }
     return <div>There are no comments</div>;
   };
